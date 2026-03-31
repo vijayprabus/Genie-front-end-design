@@ -618,6 +618,10 @@ function EditSelfHosted({ item, onClose }: { item: ModelProviderItem; onClose: (
   const [url, setUrl] = useState(meta.endpointUrl);
   const [apiKey, setApiKey] = useState("");
   const [modelId, setModelId] = useState(meta.modelId);
+  const [compatTab, setCompatTab] = useState<"openai" | "custom">("openai");
+  const [authHeader, setAuthHeader] = useState("Authorization: Bearer {key}");
+  const [requestBody, setRequestBody] = useState('{\n  "prompt": "{system_prompt}\\n\\n{user_message}",\n  "parameters": { "max_new_tokens": 512 }\n}');
+  const [responsePath, setResponsePath] = useState("");
 
   if (flow === "savedFlash") return <Flash onClose={onClose} icon={<AnimatedCheck />} title="Changes saved" />;
   if (flow === "deletedFlash") return <Flash onClose={onClose} icon={<AnimatedCheck />} title={`${name} deleted`} subtitle="Endpoint has been removed." />;
@@ -625,9 +629,17 @@ function EditSelfHosted({ item, onClose }: { item: ModelProviderItem; onClose: (
     <Confirm onClose={onClose} onCancel={() => setFlow("edit")}
       onConfirm={() => { setFlow("deletedFlash"); setTimeout(onClose, 1500); }}
       iconColor="#F59E0B" title={`Delete ${name}?`}
-      description={`This will remove the custom endpoint. ${meta.workers.length > 0 ? `${meta.workers.reduce((s, w) => s + w.workerCount, 0)} workers will lose access.` : "No workers are currently using this endpoint."}`}
+      description={`This will remove the custom endpoint. Tasks will no longer be routed to this endpoint.`}
       confirmLabel="Delete" confirmDanger />
   );
+
+  const tabStyle = (active: boolean): React.CSSProperties => ({
+    padding: "0 0 8px", marginRight: 16, border: "none",
+    borderBottom: active ? `2px solid ${ws.primary}` : "2px solid transparent",
+    cursor: "pointer", fontSize: 13, fontWeight: active ? 600 : 500, fontFamily: f,
+    backgroundColor: "transparent", color: active ? ws.primary : ws.muted_text,
+    transition: "color 0.15s, border-color 0.15s",
+  });
 
   return (
     <div style={shell}>
@@ -635,19 +647,52 @@ function EditSelfHosted({ item, onClose }: { item: ModelProviderItem; onClose: (
         <div style={{ width: 24, height: 24, borderRadius: 6, flexShrink: 0, border: `1.5px dashed ${ws.inputBorder}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: ws.secondary, fontFamily: f }}>{(name || "?").charAt(0).toUpperCase()}</div>
         <Title>{name}</Title>
       </Head>
+      {/* Compatibility tabs */}
+      <div style={{ display: "flex", gap: 0, padding: "0 20px", borderBottom: `1px solid ${ws.divider}` }}>
+        <button onClick={() => setCompatTab("openai")} style={tabStyle(compatTab === "openai")}>OpenAI-compatible</button>
+        <button onClick={() => setCompatTab("custom")} style={tabStyle(compatTab === "custom")}>Custom schema</button>
+      </div>
       <div style={bodyFade}>
         <div style={{ padding: "16px 20px 40px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}><Lbl style={{ marginBottom: 0 }}>Name</Lbl><TestBtn providerId={item.id} modelId={modelId} /></div>
-          <Inp value={name} onChange={setName} placeholder="Endpoint name" />
-          <div style={{ marginTop: 14 }}><Lbl>Endpoint URL</Lbl><Inp value={url} onChange={setUrl} placeholder="https://your-endpoint.com/v1" /></div>
-          <div style={{ marginTop: 14 }}><Lbl>API Key</Lbl><MaskedInp masked={meta.maskedKey} value={apiKey} onChange={setApiKey} placeholder="Enter key..." /></div>
-          <div style={{ marginTop: 14 }}><Lbl>Model ID</Lbl><Inp value={modelId} onChange={setModelId} placeholder="e.g. llama-3.1-70b" /></div>
-
-          {/* Info text */}
-          <div style={{ display: "flex", gap: 8, alignItems: "start", marginTop: 14 }}>
-            <Info size={13} color={ws.muted_text} style={{ flexShrink: 0, marginTop: 1 }} />
-            <span style={{ fontSize: 11, color: ws.muted_text, fontFamily: f, lineHeight: 1.5 }}>Genie will use this provider when a task matches its capabilities.</span>
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}><Lbl style={{ marginBottom: 0 }}>Name</Lbl><TestBtn providerId={item.id} modelId={modelId} /></div>
+            <Inp value={name} onChange={setName} placeholder="Endpoint name" />
           </div>
+          <div style={{ marginBottom: 14 }}><Lbl>Endpoint URL</Lbl><Inp value={url} onChange={setUrl} placeholder="https://your-endpoint.com/v1" /></div>
+
+          {compatTab === "openai" ? (<>
+            <div style={{ marginBottom: 14 }}><Lbl>API Key</Lbl><MaskedInp masked={meta.maskedKey} value={apiKey} onChange={setApiKey} placeholder="Enter key..." /></div>
+            <div style={{ marginBottom: 14 }}><Lbl>Model ID</Lbl><Inp value={modelId} onChange={setModelId} placeholder="e.g. llama-3.1-70b" /></div>
+            <div style={{ display: "flex", gap: 8, alignItems: "start" }}>
+              <Info size={13} color={ws.muted_text} style={{ flexShrink: 0, marginTop: 1 }} />
+              <span style={{ fontSize: 11, color: ws.muted_text, fontFamily: f, lineHeight: 1.5 }}>Genie will use this provider when a task matches its capabilities.</span>
+            </div>
+          </>) : (<>
+            <div style={{ fontSize: 11, color: ws.muted_text, fontFamily: f, marginBottom: 14, lineHeight: 1.4 }}>Define how Genie constructs requests and extracts responses from this endpoint.</div>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 6 }}>
+                <Lbl style={{ marginBottom: 0 }}>Auth Header</Lbl>
+                <span style={{ fontSize: 10, color: ws.muted_text, fontFamily: f }}>Use {"{key}"} as placeholder</span>
+              </div>
+              <Inp value={authHeader} onChange={setAuthHeader} placeholder="Authorization: Bearer {key}" />
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 6 }}>
+                <Lbl style={{ marginBottom: 0 }}>Request Body Template</Lbl>
+                <span style={{ fontSize: 10, color: ws.muted_text, fontFamily: f }}>Variables: {"{system_prompt}"} {"{user_message}"} {"{messages_array}"} {"{model_id}"}</span>
+              </div>
+              <textarea value={requestBody} onChange={(e) => setRequestBody(e.target.value)}
+                style={{ width: "100%", minHeight: 100, borderRadius: 8, border: `1px solid ${ws.inputBorder}`, padding: "10px 14px", fontSize: 12, fontFamily: "monospace, Inter, sans-serif", color: ws.body, backgroundColor: ws.surface, resize: "vertical", outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 6 }}>
+                <Lbl style={{ marginBottom: 0 }}>Response Text Path</Lbl>
+                <span style={{ fontSize: 10, color: ws.muted_text, fontFamily: f }}>JSONPath to the generated text in the response</span>
+              </div>
+              <Inp value={responsePath} onChange={setResponsePath} placeholder="e.g. $.generated_text or $.choices[0].message.content" />
+            </div>
+          </>)}
         </div>
       </div>
       <div style={{ padding: "12px 20px 16px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: ws.surface }}>
@@ -669,32 +714,122 @@ function AddSelfHosted({ onClose }: { onClose: () => void }) {
   const [url, setUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [modelId, setModelId] = useState("");
+  const [compatTab, setCompatTab] = useState<"openai" | "custom">("openai");
+  const [authHeader, setAuthHeader] = useState("Authorization: Bearer {key}");
+  const [requestBody, setRequestBody] = useState('{\n  "prompt": "{system_prompt}\\n\\n{user_message}",\n  "parameters": { "max_new_tokens": 512 }\n}');
+  const [responsePath, setResponsePath] = useState("");
+  const [testState, setTestState] = useState<"idle" | "testing" | "pass" | "fail">("idle");
 
-  const ok = name.trim().length > 0 && url.trim().length > 0 && modelId.trim().length > 0;
+  const ok = name.trim().length > 0 && url.trim().length > 0 && (compatTab === "openai" ? modelId.trim().length > 0 : responsePath.trim().length > 0);
 
   if (flow === "addedFlash") return <Flash onClose={onClose} icon={<AnimatedCheck />} title="Endpoint added" subtitle={`${name} is now available.`} />;
 
   const isAdding = flow === "adding";
 
+  const handleTest = () => {
+    setTestState("testing");
+    setTimeout(() => {
+      setTestState(Math.random() > 0.1 ? "pass" : "fail");
+      setTimeout(() => setTestState("idle"), 2000);
+    }, 1200);
+  };
+
+  const tabStyle = (active: boolean): React.CSSProperties => ({
+    padding: "0 0 8px", marginRight: 16, border: "none",
+    borderBottom: active ? `2px solid ${ws.primary}` : "2px solid transparent",
+    cursor: "pointer", fontSize: 13, fontWeight: active ? 600 : 500, fontFamily: f,
+    backgroundColor: "transparent", color: active ? ws.primary : ws.muted_text,
+    transition: "color 0.15s, border-color 0.15s",
+  });
+
   return (
     <div style={shell}>
       <Head onClose={onClose}>
         <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}><Server size={20} color={ws.secondary} /></div>
-        <Title>Add Custom Endpoint</Title>
+        <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <Title>Custom endpoint</Title>
+          <span style={{ fontSize: 11, color: ws.muted_text, fontFamily: f }}>Self-hosted or proprietary inference API</span>
+        </div>
       </Head>
+      {/* Compatibility tabs */}
+      <div style={{ display: "flex", gap: 0, padding: "0 20px", borderBottom: `1px solid ${ws.divider}` }}>
+        <button onClick={() => setCompatTab("openai")} style={tabStyle(compatTab === "openai")}>OpenAI-compatible</button>
+        <button onClick={() => setCompatTab("custom")} style={tabStyle(compatTab === "custom")}>Custom schema</button>
+      </div>
       <div style={bodyFade}>
         <div style={{ padding: "16px 20px 40px" }}>
-          <p style={{ fontSize: 13, lineHeight: 1.5, color: ws.secondary, fontFamily: f, margin: "0 0 16px" }}>Connect a self-hosted or custom model endpoint.</p>
-          <div style={{ marginBottom: 14 }}><Lbl>Name</Lbl><Inp value={name} onChange={setName} placeholder="e.g. Internal LLM" /></div>
+          {/* Shared fields */}
+          <div style={{ marginBottom: 14 }}><Lbl>Name</Lbl><Inp value={name} onChange={setName} placeholder="e.g. Marico Internal LLM" /></div>
           <div style={{ marginBottom: 14 }}><Lbl>Endpoint URL</Lbl><Inp value={url} onChange={setUrl} placeholder="https://your-endpoint.com/v1" /></div>
-          <div style={{ marginBottom: 14 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <Lbl style={{ marginBottom: 0 }}>API Key</Lbl>
-              <span style={{ fontSize: 10, fontWeight: 500, color: ws.muted_text, fontFamily: f, padding: "1px 6px", borderRadius: 4, backgroundColor: ws.muted, marginBottom: 6 }}>Optional</span>
+
+          {compatTab === "openai" ? (<>
+            {/* OpenAI-compatible fields */}
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <Lbl style={{ marginBottom: 0 }}>API Token</Lbl>
+                <span style={{ fontSize: 10, fontWeight: 500, color: ws.muted_text, fontFamily: f, padding: "1px 6px", borderRadius: 4, backgroundColor: ws.muted, marginBottom: 6 }}>Optional</span>
+              </div>
+              <PwdInp value={apiKey} onChange={setApiKey} placeholder="Enter key if required..." />
             </div>
-            <PwdInp value={apiKey} onChange={setApiKey} placeholder="Enter key if required..." />
-          </div>
-          <div><Lbl>Model ID</Lbl><Inp value={modelId} onChange={setModelId} placeholder="e.g. llama-3.1-70b" /></div>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Lbl>Model</Lbl>
+                <span style={{ fontSize: 11, color: ws.muted_text, fontFamily: f, marginBottom: 6 }}>From Genie model registry</span>
+              </div>
+              <Inp value={modelId} onChange={setModelId} placeholder="e.g. llama-3.1-70b" />
+            </div>
+            <div style={{ fontSize: 11, color: ws.muted_text, fontFamily: f, marginBottom: 14 }}>Works with vLLM, Ollama, LiteLLM, NVIDIA NIM.</div>
+            <div style={{ display: "flex", gap: 8, alignItems: "start" }}>
+              <Info size={13} color={ws.muted_text} style={{ flexShrink: 0, marginTop: 1 }} />
+              <span style={{ fontSize: 11, color: ws.muted_text, fontFamily: f, lineHeight: 1.5 }}>Genie will use this provider when a task matches its capabilities.</span>
+            </div>
+          </>) : (<>
+            {/* Custom schema fields */}
+            <div style={{ fontSize: 11, color: ws.muted_text, fontFamily: f, marginBottom: 14, lineHeight: 1.4 }}>Define how Genie constructs requests and extracts responses from this endpoint.</div>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 6 }}>
+                <Lbl style={{ marginBottom: 0 }}>Auth Header</Lbl>
+                <span style={{ fontSize: 10, color: ws.muted_text, fontFamily: f }}>Use {"{key}"} as placeholder</span>
+              </div>
+              <Inp value={authHeader} onChange={setAuthHeader} placeholder="Authorization: Bearer {key}" />
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 6 }}>
+                <Lbl style={{ marginBottom: 0 }}>Request Body Template</Lbl>
+                <span style={{ fontSize: 10, color: ws.muted_text, fontFamily: f }}>Variables: {"{system_prompt}"} {"{user_message}"} {"{messages_array}"} {"{model_id}"}</span>
+              </div>
+              <textarea value={requestBody} onChange={(e) => setRequestBody(e.target.value)}
+                style={{ width: "100%", minHeight: 100, borderRadius: 8, border: `1px solid ${ws.inputBorder}`, padding: "10px 14px", fontSize: 12, fontFamily: "monospace", color: ws.body, backgroundColor: ws.surface, resize: "vertical", outline: "none", boxSizing: "border-box" }}
+              />
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 6 }}>
+                <Lbl style={{ marginBottom: 0 }}>Response Text Path</Lbl>
+                <span style={{ fontSize: 10, color: ws.muted_text, fontFamily: f }}>JSONPath to the generated text in the response</span>
+              </div>
+              <Inp value={responsePath} onChange={setResponsePath} placeholder="e.g. $.generated_text or $.choices[0].message.content" />
+            </div>
+            {/* Test Connection */}
+            <div style={{ borderTop: `1px solid ${ws.divider}`, paddingTop: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                <Lbl style={{ marginBottom: 0 }}>Test Connection</Lbl>
+                <button onClick={handleTest} disabled={testState === "testing"}
+                  style={{
+                    height: 30, padding: "0 14px", borderRadius: 8, border: `1px solid ${ws.primaryLight}`,
+                    backgroundColor: "transparent", display: "flex", alignItems: "center", gap: 6,
+                    cursor: testState === "testing" ? "default" : "pointer", fontSize: 12, fontWeight: 500,
+                    color: testState === "pass" ? ws.success : testState === "fail" ? ws.error : ws.primary,
+                    fontFamily: f, transition: "color 0.15s",
+                  }}
+                >
+                  {testState === "testing" && <Loader2 size={12} style={{ animation: "mdl-spin 1s linear infinite" }} />}
+                  {testState === "idle" && <FlaskConical size={12} />}
+                  {testState === "idle" ? "Run test" : testState === "testing" ? "Testing..." : testState === "pass" ? "✓ Pass" : "✗ Fail"}
+                </button>
+              </div>
+              <span style={{ fontSize: 11, color: ws.muted_text, fontFamily: f, lineHeight: 1.4 }}>Sends a minimal probe via Genie backend. Confirms auth and model availability.</span>
+            </div>
+          </>)}
         </div>
       </div>
       <div style={{ padding: "12px 20px 16px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: ws.surface }}>
@@ -705,7 +840,7 @@ function AddSelfHosted({ onClose }: { onClose: () => void }) {
           disabled={!ok || isAdding} style={{ ...priBtn, padding: "0 16px", backgroundColor: !ok || isAdding ? ws.disabled : ws.primary, cursor: !ok || isAdding ? "default" : "pointer" }}
           onMouseEnter={ok && !isAdding ? hoverP : undefined} onMouseLeave={ok && !isAdding ? leaveP : undefined}>
           {isAdding && <Loader2 size={14} style={{ animation: "mdl-spin 1s linear infinite" }} />}
-          {isAdding ? "Adding..." : "Add Endpoint"}
+          {isAdding ? "Saving..." : "Save"}
         </button>
       </div>
     </div>
