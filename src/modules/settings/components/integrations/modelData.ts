@@ -37,7 +37,7 @@ export interface ModelProviderItem {
   maskedKey?: string;
   paused?: boolean;
   panelMode: ModelPanelMode;
-  providerType: "simple" | "bedrock" | "azure" | "selfhosted" | "genie";
+  providerType: "simple" | "bedrock" | "azure" | "huggingface" | "selfhosted" | "genie";
 }
 
 // ---- 1. Genie Managed (Default section) -----------------------------------
@@ -173,6 +173,14 @@ export const availableProviders: ModelProviderItem[] = [
     panelMode: "add-provider",
     providerType: "simple",
   },
+  {
+    id: "huggingface",
+    name: "HuggingFace",
+    description: "Open-source model hub & inference",
+    configured: false,
+    panelMode: "add-provider",
+    providerType: "huggingface",
+  },
 ];
 
 // ---- 5. Provider Meta (per-provider configuration details) ----------------
@@ -251,6 +259,11 @@ export const providerMeta: Record<string, ProviderConfig> = {
     maskedKey: "",
     workers: [],
   },
+  huggingface: {
+    name: "HuggingFace",
+    maskedKey: "",
+    workers: [],
+  },
 };
 
 // ---- 6. Self-Hosted Meta --------------------------------------------------
@@ -289,6 +302,7 @@ export const testMessages: Record<string, string> = {
   xai: "Tested Grok-2 \u00b7 89ms response",
   minimax: "Tested MiniMax abab6.5 \u00b7 147ms response",
   moonshot: "Tested Moonshot Kimi \u00b7 156ms response",
+  huggingface: "Tested Llama 3.1 8B via HF Inference \u00b7 185ms response",
   "marico-llm": "Tested Llama 3.1 70B (self-hosted) \u00b7 78ms response",
 };
 
@@ -308,6 +322,7 @@ export const providerNames: Record<string, string> = {
   moonshot: "Moonshot AI",
   groq: "Groq",
   xai: "xAI",
+  huggingface: "HuggingFace",
   "marico-llm": "Marico Internal LLM",
 };
 

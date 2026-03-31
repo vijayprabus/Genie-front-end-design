@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   X, Zap, CircleDollarSign, RefreshCw, Trash2, FlaskConical,
-  Loader2, Eye, EyeOff, ChevronDown, Server,
+  Loader2, Eye, EyeOff, ChevronDown, Server, Info,
 } from "lucide-react";
 import type { ModelProviderItem } from "./modelData";
 import { providerMeta, selfHostedMeta, testMessages, bedrockRegions, providerNames } from "./modelData";
@@ -375,14 +375,14 @@ function EditProvider({ item, onClose }: { item: ModelProviderItem; onClose: () 
     <Confirm onClose={onClose} onCancel={() => setFlow("edit")}
       onConfirm={() => { setFlow("deletedFlash"); setTimeout(onClose, 1500); }}
       iconColor="#F59E0B" title={`Delete ${item.name} API key?`}
-      description={`This will disconnect ${item.name} from Genie. ${meta.workers.length > 0 ? `${meta.workers.reduce((s, w) => s + w.workerCount, 0)} workers using ${item.name} models will lose access until a new key is added.` : "No workers are currently using this provider."}`}
+      description={`This will disconnect ${item.name} from Genie. Tasks will no longer be routed to ${item.name} models.`}
       confirmLabel="Delete Key" confirmDanger />
   );
   if (flow === "confirmPause") return (
     <Confirm onClose={onClose} onCancel={() => setFlow("edit")}
       onConfirm={() => { setProviderActive(false); setFlow("pausedFlash"); setTimeout(() => setFlow("edit"), 1500); }}
       iconColor="#F59E0B" title={`Pause ${item.name}?`}
-      description={`Requests will not be routed to ${item.name} until you resume. ${meta.workers.length > 0 ? `${meta.workers.reduce((s, w) => s + w.workerCount, 0)} workers using ${item.name} models will fall back to other providers.` : "No workers are currently using this provider."}`}
+      description={`Tasks will not be routed to ${item.name} models until you resume.`}
       confirmLabel="Pause" confirmDanger />
   );
 
@@ -453,7 +453,11 @@ function EditProvider({ item, onClose }: { item: ModelProviderItem; onClose: () 
             <Tog on={providerActive} onChange={handleToggle} />
           </div>
 
-          <Workers workers={meta.workers} />
+          {/* Info text */}
+          <div style={{ display: "flex", gap: 8, alignItems: "start", marginTop: 4 }}>
+            <Info size={13} color={ws.muted_text} style={{ flexShrink: 0, marginTop: 1 }} />
+            <span style={{ fontSize: 11, color: ws.muted_text, fontFamily: f, lineHeight: 1.5 }}>Genie will use this provider when a task matches its capabilities.</span>
+          </div>
         </div>
       </div>
       <div style={{ padding: "12px 20px 16px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: ws.surface }}>
@@ -480,11 +484,16 @@ function AddProvider({ item, onClose }: { item: ModelProviderItem; onClose: () =
   const [azKey, setAzKey] = useState("");
   const [endpoint, setEndpoint] = useState("");
   const [deployment, setDeployment] = useState("");
+  const [hfDeployTab, setHfDeployTab] = useState<"inference" | "tgi">("inference");
+  const [hfToken, setHfToken] = useState("");
+  const [hfEndpoint, setHfEndpoint] = useState("");
+  const [hfModel, setHfModel] = useState("");
 
   const valid = (): boolean => {
     if (item.providerType === "simple") return apiKey.trim().length > 0;
     if (item.providerType === "bedrock") return authTab === "iam" ? accessKeyId.trim().length > 0 && secretKey.trim().length > 0 : bApiKey.trim().length > 0;
     if (item.providerType === "azure") return azKey.trim().length > 0 && endpoint.trim().length > 0 && deployment.trim().length > 0;
+    if (item.providerType === "huggingface") return hfDeployTab === "inference" ? hfToken.trim().length > 0 : hfEndpoint.trim().length > 0;
     return false;
   };
 
@@ -542,6 +551,49 @@ function AddProvider({ item, onClose }: { item: ModelProviderItem; onClose: () =
             <div style={{ marginBottom: 14 }}><Lbl>Endpoint URL</Lbl><Inp value={endpoint} onChange={setEndpoint} placeholder="https://your-resource.openai.azure.com/" /></div>
             <div><Lbl>Deployment Name</Lbl><Inp value={deployment} onChange={setDeployment} placeholder="e.g. gpt-4o-prod" /></div>
           </>)}
+          {item.providerType === "huggingface" && (<>
+            <Lbl>Deployment</Lbl>
+            <div style={{ display: "flex", gap: 0, borderBottom: `1px solid ${ws.divider}`, marginBottom: 12 }}>
+              {(["inference", "tgi"] as const).map((m) => {
+                const active = hfDeployTab === m;
+                return (
+                  <button key={m} onClick={() => setHfDeployTab(m)} style={{
+                    padding: "0 0 8px", marginRight: 16, border: "none", borderBottom: active ? `2px solid ${ws.primary}` : "2px solid transparent",
+                    cursor: "pointer", fontSize: 13, fontWeight: active ? 600 : 500, fontFamily: f,
+                    backgroundColor: "transparent", color: active ? ws.primary : ws.muted_text, transition: "color 0.15s, border-color 0.15s",
+                  }}>
+                    {m === "inference" ? "HF Inference API" : "Self-hosted TGI"}
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ fontSize: 11, color: ws.muted_text, fontFamily: f, marginBottom: 14 }}>
+              {hfDeployTab === "inference" ? "Models served by HuggingFace. No infrastructure to manage." : "Your own TGI server. You manage the infrastructure."}
+            </div>
+            {hfDeployTab === "tgi" && (
+              <div style={{ marginBottom: 14 }}><Lbl>Endpoint URL</Lbl><Inp value={hfEndpoint} onChange={setHfEndpoint} placeholder="https://your-tgi-server.internal/v1" /></div>
+            )}
+            <div style={{ marginBottom: 14 }}>
+              <Lbl>{hfDeployTab === "inference" ? "API Token" : "API Token (optional)"}</Lbl>
+              <PwdInp value={hfToken} onChange={setHfToken} placeholder="Enter HuggingFace token..." />
+              {hfDeployTab === "inference" && (
+                <div style={{ fontSize: 11, color: ws.muted_text, fontFamily: f, marginTop: 6 }}>
+                  Needs read access. Get one at <span style={{ color: ws.primary, cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 2 }}>huggingface.co/settings/tokens</span> ↗
+                </div>
+              )}
+              {hfDeployTab === "tgi" && (
+                <div style={{ fontSize: 11, color: ws.muted_text, fontFamily: f, marginTop: 6 }}>Leave blank if your server has no auth configured.</div>
+              )}
+            </div>
+            <Lbl>Model</Lbl>
+            <div style={{ position: "relative" }}>
+              <Inp value={hfModel} onChange={setHfModel} placeholder="e.g. meta-llama/Llama-3.1-8B" />
+            </div>
+            <div style={{ display: "flex", gap: 8, alignItems: "start", marginTop: 12 }}>
+              <Info size={13} color={ws.muted_text} style={{ flexShrink: 0, marginTop: 1 }} />
+              <span style={{ fontSize: 11, color: ws.muted_text, fontFamily: f, lineHeight: 1.5 }}>Genie will use this provider when a task matches its capabilities.</span>
+            </div>
+          </>)}
         </div>
       </div>
       <div style={{ padding: "12px 20px 16px", flexShrink: 0, backgroundColor: ws.surface }}>
@@ -590,7 +642,12 @@ function EditSelfHosted({ item, onClose }: { item: ModelProviderItem; onClose: (
           <div style={{ marginTop: 14 }}><Lbl>Endpoint URL</Lbl><Inp value={url} onChange={setUrl} placeholder="https://your-endpoint.com/v1" /></div>
           <div style={{ marginTop: 14 }}><Lbl>API Key</Lbl><MaskedInp masked={meta.maskedKey} value={apiKey} onChange={setApiKey} placeholder="Enter key..." /></div>
           <div style={{ marginTop: 14 }}><Lbl>Model ID</Lbl><Inp value={modelId} onChange={setModelId} placeholder="e.g. llama-3.1-70b" /></div>
-          <Workers workers={meta.workers} />
+
+          {/* Info text */}
+          <div style={{ display: "flex", gap: 8, alignItems: "start", marginTop: 14 }}>
+            <Info size={13} color={ws.muted_text} style={{ flexShrink: 0, marginTop: 1 }} />
+            <span style={{ fontSize: 11, color: ws.muted_text, fontFamily: f, lineHeight: 1.5 }}>Genie will use this provider when a task matches its capabilities.</span>
+          </div>
         </div>
       </div>
       <div style={{ padding: "12px 20px 16px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: ws.surface }}>
