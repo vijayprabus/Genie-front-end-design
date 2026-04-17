@@ -663,9 +663,23 @@ function EditorInput({ onSend }: { onSend: (text: string) => void }) {
 // ---------------------------------------------------------------------------
 // ChatPanel — Forge Assistant chat with proper message components
 // ---------------------------------------------------------------------------
-function ChatPanel({ onCollapse, instructionName, lineCount }: { onCollapse: () => void; instructionName: string; lineCount: number }) {
+function ChatPanel({ onCollapse, instructionName, lineCount, mode, onRegisterRestore }: { onCollapse: () => void; instructionName: string; lineCount: number; mode: EditorMode; onRegisterRestore: (fn: (fromVersion: number) => void) => void }) {
+  const isTesting = mode === "testing";
   const [messages, setMessages] = useState<EditorChatMessage[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    onRegisterRestore((fromVersion: number) => {
+      const restoreMsg: EditorChatMessage = {
+        id: String(Date.now()),
+        role: "assistant",
+        title: "Version restored",
+        content: `Restored from v${fromVersion}. You can edit or test as-is.`,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages([restoreMsg]);
+    });
+  }, [onRegisterRestore]);
 
   const handleSend = (text: string) => {
     const newMsg: EditorChatMessage = {
@@ -707,9 +721,9 @@ function ChatPanel({ onCollapse, instructionName, lineCount }: { onCollapse: () 
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <Sparkles size={14} color={ws.primary} />
+          {isTesting ? <FlaskConical size={14} color="#B45309" /> : <Sparkles size={14} color={ws.primary} />}
           <span style={{ fontSize: 13, fontWeight: 500, color: ws.heading, fontFamily: f }}>
-            Forge Assistant
+            {isTesting ? "Test Chat" : "Forge Assistant"}
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -848,7 +862,7 @@ const VERSIONS: VersionEntry[] = [
   { version: 1, status: "published", author: "Ravi", timeAgo: "1mo" },
 ];
 
-function VersionPill({ currentVersion, versions }: { currentVersion: number; versions: VersionEntry[] }) {
+function VersionPill({ currentVersion, versions, onRestore }: { currentVersion: number; versions: VersionEntry[]; onRestore: (fromVersion: number) => void }) {
   const [open, setOpen] = useState(false);
   const [pillHover, setPillHover] = useState(false);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
@@ -960,7 +974,7 @@ function VersionPill({ currentVersion, versions }: { currentVersion: number; ver
               transition: "color 0.15s ease",
             }}
           >
-            · {current?.status === "draft" ? "Draft" : current?.status}
+            · {!current ? "Draft" : current.status === "draft" ? "Draft" : current.status}
           </span>
         )}
 
@@ -1041,7 +1055,7 @@ function VersionPill({ currentVersion, versions }: { currentVersion: number; ver
                     </span>
                     <span
                       style={{ fontSize: 12, fontWeight: 500, color: ws.primary, marginLeft: 8, cursor: "pointer", transition: "color 0.15s" }}
-                      onClick={(e) => { e.stopPropagation(); setOpen(false); setConfirmingVersion(null); }}
+                      onClick={(e) => { e.stopPropagation(); setOpen(false); setConfirmingVersion(null); onRestore(entry.version); }}
                       onMouseEnter={(e) => { e.currentTarget.style.color = ws.primaryHover; }}
                       onMouseLeave={(e) => { e.currentTarget.style.color = ws.primary; }}
                     >
@@ -1142,7 +1156,8 @@ const DAG_NODES: { label: string; type: "agent" | "tool" | "capability"; status:
   { label: "Quality Checker", type: "agent", status: "ok", meta: "Agent", x: 160, y: 300 },
 ];
 
-function DAGPanel({ onCollapse }: { onCollapse: () => void }) {
+function DAGPanel({ onCollapse, mode }: { onCollapse: () => void; mode: EditorMode }) {
+  const isStale = mode === "editing";
   return (
     <div
       style={{
@@ -1184,7 +1199,12 @@ function DAGPanel({ onCollapse }: { onCollapse: () => void }) {
             {DAG_NODES.length} nodes
           </span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          {isStale && (
+            <span style={{ fontSize: 10, fontWeight: 500, color: ws.muted_text, fontFamily: f }}>
+              Last validated
+            </span>
+          )}
           <GhostButton ariaLabel="Fit to view" size={28}>
             <Maximize2 size={14} />
           </GhostButton>
@@ -1204,7 +1224,8 @@ function DAGPanel({ onCollapse }: { onCollapse: () => void }) {
           backgroundSize: "20px 20px",
         }}
       >
-        {/* Nodes — positioned absolutely on canvas */}
+        {/* Nodes + connectors wrapper — fades when stale */}
+        <div style={{ position: "absolute", inset: 0, opacity: isStale ? 0.75 : 1, transition: "opacity 320ms ease" }}>
         {DAG_NODES.map((node, i) => {
           const gradientStart = node.type === "agent" ? "#EDE9FE"
             : node.type === "tool" ? "#FFFBEB"
@@ -1277,6 +1298,7 @@ function DAGPanel({ onCollapse }: { onCollapse: () => void }) {
           {/* Doc Processing to Quality Checker */}
           <line x1={255} y1={226} x2={255} y2={300} stroke={ws.border} strokeWidth={2} />
         </svg>
+        </div>
 
         {/* Floating controls — bottom right */}
         <div
@@ -1305,6 +1327,25 @@ function DAGPanel({ onCollapse }: { onCollapse: () => void }) {
           </button>
         </div>
       </div>
+
+      {/* Bottom strip — editing context */}
+      {isStale && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: 32,
+            flexShrink: 0,
+            background: ws.elevated,
+            fontFamily: f,
+          }}
+        >
+          <span style={{ fontSize: 11, color: ws.muted_text }}>
+            Editing source — validate to update workflow
+          </span>
+        </div>
+      )}
 
     </div>
   );
@@ -1394,6 +1435,127 @@ function DragDivider({
 // ---------------------------------------------------------------------------
 // InstructionEditor — main export
 // ---------------------------------------------------------------------------
+type EditorMode = "viewing" | "editing" | "validating" | "validated" | "testing";
+
+const MODES: EditorMode[] = ["viewing", "editing", "validating", "validated", "testing"];
+const MODE_LABELS: Record<EditorMode, string> = {
+  viewing: "Viewing",
+  editing: "Editing",
+  validating: "Validating",
+  validated: "Validated",
+  testing: "Testing",
+};
+
+// ---------------------------------------------------------------------------
+// ModeToggle — floating demo pill for cycling editor modes (prototype only)
+// ---------------------------------------------------------------------------
+function ModeToggle({ mode, onModeChange }: { mode: EditorMode; onModeChange: (m: EditorMode) => void }) {
+  const idx = MODES.indexOf(mode);
+  const [leftHover, setLeftHover] = useState(false);
+  const [rightHover, setRightHover] = useState(false);
+
+  const prev = () => { if (idx > 0) onModeChange(MODES[idx - 1]); };
+  const next = () => { if (idx < MODES.length - 1) onModeChange(MODES[idx + 1]); };
+
+  // Keyboard: 1-5 for direct jump, arrow keys for prev/next
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Don't capture when typing in input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key >= "1" && e.key <= "5") {
+        e.preventDefault();
+        onModeChange(MODES[parseInt(e.key) - 1]);
+      }
+      if (e.key === "[" && idx > 0) { e.preventDefault(); prev(); }
+      if (e.key === "]" && idx < MODES.length - 1) { e.preventDefault(); next(); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  });
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        bottom: 16,
+        right: 16,
+        display: "flex",
+        alignItems: "center",
+        gap: 0,
+        height: 32,
+        borderRadius: 8,
+        background: ws.heading,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+        fontFamily: f,
+        zIndex: 200,
+        overflow: "hidden",
+        userSelect: "none",
+      }}
+    >
+      <button
+        onClick={prev}
+        onMouseEnter={() => setLeftHover(true)}
+        onMouseLeave={() => setLeftHover(false)}
+        disabled={idx === 0}
+        style={{
+          width: 28,
+          height: 32,
+          border: "none",
+          background: leftHover && idx > 0 ? "rgba(255,255,255,0.1)" : "transparent",
+          cursor: idx > 0 ? "pointer" : "default",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 0,
+          opacity: idx === 0 ? 0.3 : 1,
+          transition: "background 0.15s ease, opacity 0.15s ease",
+        }}
+      >
+        <ArrowLeft size={12} color="#FFF" />
+      </button>
+
+      <span
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          color: "#FFF",
+          padding: "0 4px",
+          minWidth: 80,
+          textAlign: "center",
+          letterSpacing: "0.02em",
+        }}
+      >
+        {idx + 1}. {MODE_LABELS[mode]}
+      </span>
+
+      <button
+        onClick={next}
+        onMouseEnter={() => setRightHover(true)}
+        onMouseLeave={() => setRightHover(false)}
+        disabled={idx === MODES.length - 1}
+        style={{
+          width: 28,
+          height: 32,
+          border: "none",
+          background: rightHover && idx < MODES.length - 1 ? "rgba(255,255,255,0.1)" : "transparent",
+          cursor: idx < MODES.length - 1 ? "pointer" : "default",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 0,
+          opacity: idx === MODES.length - 1 ? 0.3 : 1,
+          transition: "background 0.15s ease, opacity 0.15s ease",
+        }}
+      >
+        <ArrowLeft size={12} color="#FFF" style={{ transform: "rotate(180deg)" }} />
+      </button>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// InstructionEditor — main export
+// ---------------------------------------------------------------------------
 export default function InstructionEditor() {
   const { instructionId } = useParams<{ instructionId: string }>();
   const navigate = useNavigate();
@@ -1409,12 +1571,14 @@ export default function InstructionEditor() {
   const [dagWidth, setDagWidth] = useState(DAG_W);
   const [isDragging, setIsDragging] = useState(false);
   const [backHover, setBackHover] = useState(false);
-  const [saveDraftHover, setSaveDraftHover] = useState(false);
-  const [testHover, setTestHover] = useState(false);
+  const [mode, setMode] = useState<EditorMode>("viewing");
   const [content, setContent] = useState(instruction?.content ?? "");
   const [isLocked, setIsLocked] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
+  const [currentVersion, setCurrentVersion] = useState(4);
+  const [isRestoring, setIsRestoring] = useState(false);
   const columnsRef = useRef<HTMLDivElement>(null);
+  const chatRestoreRef = useRef<((fromVersion: number) => void) | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setPageLoading(false), 600);
@@ -1475,6 +1639,36 @@ export default function InstructionEditor() {
     [yamlState, chatWidth, getYamlAvailable]
   );
 
+  const handleValidate = () => {
+    setMode("validating");
+    setTimeout(() => setMode("validated"), 1500);
+  };
+
+  const handleStartTest = () => {
+    setMode("testing");
+    setYamlState("collapsed-left");
+    if (!dagOpen) { setDagWidth(DAG_W); setDagOpen(true); }
+    if (!chatOpen) { setChatWidth(CHAT_W); setChatOpen(true); }
+  };
+  const handleExitTest = () => {
+    setMode("validated");
+    setYamlState("open");
+  };
+
+  const handleRestore = (fromVersion: number) => {
+    setIsRestoring(true);
+    setTimeout(() => {
+      const newVer = currentVersion + 1;
+      setCurrentVersion(newVer);
+      setContent(instruction?.content ?? "");
+      setMode("viewing");
+      setIsRestoring(false);
+      if (chatRestoreRef.current) {
+        chatRestoreRef.current(fromVersion);
+      }
+    }, 400);
+  };
+
   if (pageLoading) {
     return <PageSkeleton />;
   }
@@ -1509,6 +1703,22 @@ export default function InstructionEditor() {
         overflow: "hidden",
       }}
     >
+      {/* ---------------------------------------------------------------- */}
+      {/* Sandbox banner — testing mode only                              */}
+      {/* ---------------------------------------------------------------- */}
+      {mode === "testing" && (
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          height: 28, gap: 6, background: "#FFFBEB", flexShrink: 0,
+          fontFamily: f,
+        }}>
+          <FlaskConical size={12} color="#B45309" />
+          <span style={{ fontSize: 11, fontWeight: 500, color: "#B45309" }}>
+            Sandbox Environment
+          </span>
+        </div>
+      )}
+
       {/* ---------------------------------------------------------------- */}
       {/* Top bar — 48px                                                   */}
       {/* ---------------------------------------------------------------- */}
@@ -1554,82 +1764,136 @@ export default function InstructionEditor() {
         </span>
 
         <div style={{ position: "relative" }}>
-          <VersionPill currentVersion={4} versions={VERSIONS} />
+          <VersionPill currentVersion={currentVersion} versions={VERSIONS} onRestore={handleRestore} />
         </div>
 
         <div style={{ flex: 1 }} />
 
-        {/* Validation status */}
-        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <CircleCheck size={14} color={ws.success} />
-          <span style={{ fontSize: 11, fontWeight: 500, color: ws.body, fontFamily: f }}>Valid</span>
-        </div>
+        {/* Mode-dependent right side */}
+        {mode === "viewing" && (
+          <>
+            {/* Status */}
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <CircleCheck size={14} color={ws.success} />
+              <span style={{ fontSize: 11, fontWeight: 500, color: ws.body, fontFamily: f }}>Valid</span>
+            </div>
 
-        {/* Save Draft */}
-        <button
-          onMouseEnter={() => setSaveDraftHover(true)}
-          onMouseLeave={() => setSaveDraftHover(false)}
-          style={{
-            height: 30,
-            padding: "0 14px",
-            borderRadius: 8,
-            border: "none",
-            background: saveDraftHover ? ws.elevated : "transparent",
-            cursor: "pointer",
-            fontSize: 11,
-            fontWeight: 500,
-            color: ws.body,
-            fontFamily: f,
-          }}
-        >
-          Save Draft
-        </button>
+            {/* Primary CTA: Edit */}
+            <button onClick={() => setMode("editing")} style={{
+              height: 30, padding: "0 16px", borderRadius: 8, border: "none",
+              background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
+              color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(124,58,237,0.2)",
+            }}>
+              Edit
+            </button>
+          </>
+        )}
 
-        {/* Test */}
-        <button
-          onMouseEnter={() => setTestHover(true)}
-          onMouseLeave={() => setTestHover(false)}
-          style={{
-            height: 30,
-            padding: "0 12px",
-            borderRadius: 8,
-            border: "none",
-            background: testHover ? ws.elevated : "transparent",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            fontFamily: f,
-          }}
-        >
-          <FlaskConical size={12} color={ws.body} />
-          <span style={{ fontSize: 11, fontWeight: 500, color: ws.body }}>Test</span>
-        </button>
+        {mode === "editing" && (
+          <>
+            {/* Status: Unsaved */}
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: ws.warning }} />
+              <span style={{ fontSize: 11, fontWeight: 500, color: "#B45309", fontFamily: f }}>Unsaved</span>
+            </div>
 
-        {/* Publish */}
-        <button
-          style={{
-            height: 30,
-            padding: "0 16px",
-            borderRadius: 8,
-            border: "none",
-            background: ws.primary,
-            cursor: "pointer",
-            fontSize: 11,
-            fontWeight: 600,
-            color: "#FFF",
-            fontFamily: f,
-            boxShadow: "0 1px 3px rgba(124,58,237,0.2)",
-          }}
-        >
-          Publish
-        </button>
+            {/* Save Draft — ghost text */}
+            <span onClick={() => {}} style={{
+              fontSize: 11, fontWeight: 500, color: ws.secondary, cursor: "pointer", fontFamily: f,
+            }}>
+              Save Draft
+            </span>
+
+            {/* Primary CTA: Validate */}
+            <button onClick={handleValidate} style={{
+              height: 30, padding: "0 16px", borderRadius: 8, border: "none",
+              background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
+              color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(124,58,237,0.2)",
+            }}>
+              Validate
+            </button>
+          </>
+        )}
+
+        {mode === "validating" && (
+          /* Status: Validating... with spinner */
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <RotateCcw size={14} color={ws.muted_text} style={{ animation: "spin 1s linear infinite" }} />
+            <span style={{ fontSize: 11, fontWeight: 500, color: ws.muted_text, fontFamily: f }}>Validating…</span>
+          </div>
+        )}
+
+        {mode === "validated" && (
+          <>
+            {/* Status: Valid */}
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <CircleCheck size={14} color={ws.success} />
+              <span style={{ fontSize: 11, fontWeight: 500, color: ws.body, fontFamily: f }}>Valid</span>
+            </div>
+
+            {/* Save Draft — ghost text */}
+            <span onClick={() => {}} style={{
+              fontSize: 11, fontWeight: 500, color: ws.secondary, cursor: "pointer", fontFamily: f,
+            }}>
+              Save Draft
+            </span>
+
+            {/* Primary CTA: Test */}
+            <button onClick={handleStartTest} style={{
+              height: 30, padding: "0 16px", borderRadius: 8, border: "none",
+              background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
+              color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(124,58,237,0.2)",
+              display: "flex", alignItems: "center", gap: 4,
+            }}>
+              <FlaskConical size={12} color="#FFF" />
+              Test
+            </button>
+          </>
+        )}
+
+        {mode === "testing" && (
+          <>
+            {/* Exit Test — ghost text */}
+            <span onClick={handleExitTest} style={{
+              fontSize: 11, fontWeight: 500, color: ws.secondary, cursor: "pointer", fontFamily: f,
+            }}>
+              Exit Test
+            </span>
+
+            {/* Primary CTA: Publish */}
+            <button style={{
+              height: 30, padding: "0 16px", borderRadius: 8, border: "none",
+              background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
+              color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(124,58,237,0.2)",
+            }}>
+              Publish
+            </button>
+          </>
+        )}
       </div>
 
       {/* ---------------------------------------------------------------- */}
       {/* Three columns                                                    */}
       {/* ---------------------------------------------------------------- */}
-      <div ref={columnsRef} style={{ display: "flex", flex: 1, minHeight: 0, gap: 0, padding: "6px" }}>
+      <div ref={columnsRef} style={{ display: "flex", flex: 1, minHeight: 0, gap: 0, padding: "6px", position: "relative" }}>
+
+        {isRestoring && (
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 100,
+            background: "rgba(235, 231, 226, 0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 10,
+            transition: "opacity 200ms ease",
+          }}>
+            <span style={{ fontSize: 12, fontWeight: 500, color: ws.muted_text, fontFamily: f }}>
+              Restoring…
+            </span>
+          </div>
+        )}
 
         {/* Chat column */}
         <div
@@ -1646,7 +1910,13 @@ export default function InstructionEditor() {
           }}
         >
           {chatOpen ? (
-            <ChatPanel onCollapse={() => setChatOpen(false)} instructionName={instruction.name} lineCount={lineNumbers.length} />
+            <ChatPanel
+              onCollapse={() => setChatOpen(false)}
+              instructionName={instruction.name}
+              lineCount={lineNumbers.length}
+              mode={mode}
+              onRegisterRestore={(fn) => { chatRestoreRef.current = fn; }}
+            />
           ) : (
             <PanelStrip
               icon="chat"
@@ -1763,8 +2033,11 @@ export default function InstructionEditor() {
                     onChange={(e) => {
                       setContent(e.target.value);
                       setIsLocked(false);
+                      if (mode === "viewing" || mode === "validated") {
+                        setMode("editing");
+                      }
                     }}
-                    readOnly={isLocked}
+                    readOnly={mode === "viewing" || mode === "validating" || mode === "testing"}
                     spellCheck={false}
                     style={{
                       flex: 1,
@@ -1817,7 +2090,7 @@ export default function InstructionEditor() {
           }}
         >
           {dagOpen ? (
-            <DAGPanel onCollapse={() => setDagOpen(false)} />
+            <DAGPanel onCollapse={() => setDagOpen(false)} mode={mode} />
           ) : (
             <PanelStrip
               icon="dag"
@@ -1828,6 +2101,11 @@ export default function InstructionEditor() {
           )}
         </div>
       </div>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Prototype mode toggle — floating pill for demos                  */}
+      {/* ---------------------------------------------------------------- */}
+      <ModeToggle mode={mode} onModeChange={setMode} />
 
     </div>
   );

@@ -69,6 +69,22 @@
   }
 }
 
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+@keyframes gf-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes gf-toggle-glow {
+  0% { box-shadow: 0 0 0 0 rgba(124,58,237,0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(124,58,237,0.15); }
+  100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+}
+
+@keyframes gf-acheck-circle { 100% { stroke-dashoffset: 0; } }
+@keyframes gf-acheck-check { 100% { stroke-dashoffset: 0; } }
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
