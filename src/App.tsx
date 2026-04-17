@@ -29,9 +29,12 @@ const IntegrationsV5 = lazy(() => import("@/modules/settings/components/integrat
 const AppsTab = lazy(() => import("@/modules/settings/components/integrations/AppsTab"));
 const DataTab = lazy(() => import("@/modules/settings/components/integrations/DataTab"));
 const HomePage = lazy(() => import("@/modules/home/components/HomePage"));
+const ChatPage = lazy(() => import("@/modules/chat/pages/ChatPage/index.tsx"));
 const ProfilePage = lazy(() => import("@/modules/profile/components/ProfilePage"));
 const RolesPage = lazy(() => import("@/modules/roles/components/RolesPage"));
 const RoleDetailPage = lazy(() => import("@/modules/roles/components/RoleDetailPage"));
+const InstructionsPage = lazy(() => import("@/modules/instructions/components/InstructionsPage"));
+const InstructionEditor = lazy(() => import("@/modules/instructions/components/InstructionEditor"));
 const FleetViewPage = lazy(() => import("@/modules/workers/components/fleet/FleetViewPage"));
 const KycWorkerLayout = lazy(() => import("@/modules/workers/components/KycWorkerLayout"));
 const KycActivityTab = lazy(() => import("@/modules/workers/components/kyc/ActivityTab"));
@@ -86,12 +89,17 @@ function AppRoutes() {
       <Route path="/marketplace/browse" element={<ProtectedRoute><MarketplaceBrowse /></ProtectedRoute>} />
       <Route path="/marketplace/agents" element={<ProtectedRoute><MarketplaceAgents /></ProtectedRoute>} />
 
+      {/* Instruction Editor — full-page focused environment, no sidebar */}
+      <Route path="/instructions/:instructionId/edit" element={<InstructionEditor />} />
+
       {/* Genie routes — shared sidebar, only content swaps */}
       <Route element={<GenieProtectedRoute />}>
         <Route path="/home" element={<HomePage />} />
+        <Route path="/chat" element={<ChatPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/roles" element={<RolesPage />} />
         <Route path="/roles/:roleId" element={<RoleDetailPage />} />
+        <Route path="/instructions" element={<InstructionsPage />} />
         <Route path="/workers" element={<FleetViewPage />} />
         <Route path="/workers/kyc" element={<KycWorkerLayout />}>
           <Route index element={<Navigate to="activity" replace />} />

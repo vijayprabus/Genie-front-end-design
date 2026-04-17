@@ -552,7 +552,6 @@ function AddProvider({ item, onClose }: { item: ModelProviderItem; onClose: () =
             <div><Lbl>Deployment Name</Lbl><Inp value={deployment} onChange={setDeployment} placeholder="e.g. gpt-4o-prod" /></div>
           </>)}
           {item.providerType === "huggingface" && (<>
-            <Lbl>Deployment</Lbl>
             <div style={{ display: "flex", gap: 0, borderBottom: `1px solid ${ws.divider}`, marginBottom: 12 }}>
               {(["inference", "tgi"] as const).map((m) => {
                 const active = hfDeployTab === m;
