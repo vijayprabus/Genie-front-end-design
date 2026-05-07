@@ -8,45 +8,95 @@
  * Sidebar has its own extended palette in SettingsSidebar.tsx — that's
  * intentional (different bg zone). But sidebar tokens that overlap
  * with content (primary, success, error, etc.) must match these values.
+ *
+ * All values are CSS variable references so theme overrides via
+ * [data-theme="..."] wrapper elements work automatically.
  */
 
-/** Content-zone color tokens — warm stone + deep violet */
+/** Content-zone color tokens — warm stone + deep violet (default) */
 export const ws = {
   // Backgrounds
-  page:         "#FAF8F5",
-  surface:      "#FFFDF9",
-  elevated:     "#F5F0EB",
-  muted:        "#F0EBE4",   // also used as accent/divider bg
-  hoverBg:      "#EDE8E3",
-  border:       "#E7E0D8",
-  divider:      "#F0EBE4",
-  inputBorder:  "#D6D3D1",
+  page:         "var(--ws-page)",
+  surface:      "var(--ws-surface)",
+  elevated:     "var(--ws-elevated)",
+  muted:        "var(--ws-muted)",
+  hoverBg:      "var(--ws-hover-bg)",
+  border:       "var(--ws-border)",
+  divider:      "var(--ws-divider)",
+  inputBorder:  "var(--ws-input-border)",
 
   // Text
-  heading:      "#292524",
-  body:         "#44403C",
-  secondary:    "#78716C",
-  muted_text:   "#A8A29E",
-  disabled:     "#D6D3D1",
+  heading:      "var(--ws-heading)",
+  body:         "var(--ws-body)",
+  secondary:    "var(--ws-secondary)",
+  muted_text:   "var(--ws-muted-text)",
+  disabled:     "var(--ws-disabled)",
 
   // Brand
-  primary:      "#7C3AED",
-  primaryHover: "#6D28D9",
-  primaryDark:  "#5B21B6",
-  primaryLight: "#EDE9FE",
+  brandLogo:    "var(--ws-brand-logo)",
+  primary:      "var(--ws-primary)",
+  primaryHover: "var(--ws-primary-hover)",
+  primaryDark:  "var(--ws-primary-dark)",
+  primaryLight: "var(--ws-primary-light)",
 
   // Semantic
-  success:      "#10B981",
-  successBg:    "#ECFDF5",
-  successFg:    "#065F46",
-  warning:      "#F59E0B",
-  warningBg:    "#FFFBEB",
-  warningFg:    "#92400E",
-  error:        "#E11D48",
-  errorBg:      "#FFF1F2",
-  errorFg:      "#9F1239",
-  errorBorder:  "#FECACA",
-} as const;
+  success:      "var(--ws-success)",
+  successBg:    "var(--ws-success-bg)",
+  successFg:    "var(--ws-success-fg)",
+  warning:      "var(--ws-warning)",
+  warningBg:    "var(--ws-warning-bg)",
+  warningFg:    "var(--ws-warning-fg)",
+  error:        "var(--ws-error)",
+  errorBg:      "var(--ws-error-bg)",
+  errorFg:      "var(--ws-error-fg)",
+  errorBorder:  "var(--ws-error-border)",
+
+  // Extra tokens for inline hex leaks
+  errorHover:     "var(--ws-error-hover)",
+  errorHoverBg:   "var(--ws-error-hover-bg)",
+  errorTextHover: "var(--ws-error-text-hover)",
+  toggleBg:       "var(--ws-toggle-bg)",
+  onPrimary:      "var(--ws-on-primary)",
+
+  // Effect tokens — CSS-var driven, no-op in :root, active under theme variants
+  buttonInnerHighlight: "var(--ws-button-inner-highlight)",
+  cardShadow:           "var(--ws-card-shadow)",
+  cardBorder:           "var(--ws-card-border)",
+  sidebarEdge:          "var(--ws-sidebar-edge)",
+  searchShadow:         "var(--ws-search-shadow)",
+  searchBorder:         "var(--ws-search-border)",
+  focusRing:            "var(--ws-focus-ring)",
+
+  // Sidebar-specific tokens (SettingsSidebar palette)
+  sidebarBg:           "var(--ws-sidebar-bg)",
+  sidebarZone:         "var(--ws-sidebar-zone)",
+  sidebarDivider:      "var(--ws-sidebar-divider)",
+  sidebarBody:         "var(--ws-sidebar-body)",
+  sidebarIconRest:     "var(--ws-sidebar-icon-rest)",
+  sidebarIconHover:    "var(--ws-sidebar-icon-hover)",
+  sidebarKbHint:       "var(--ws-sidebar-kb-hint)",
+  sidebarActiveBg:     "var(--ws-sidebar-active-bg)",
+  sidebarActiveHoverBg:"var(--ws-sidebar-active-hover-bg)",
+  sidebarHoverBg:      "var(--ws-sidebar-hover-bg)",
+  sidebarFocusRing:    "var(--ws-sidebar-focus-ring)",
+  sidebarScrollbar:    "var(--ws-sidebar-scrollbar)",
+  sidebarScrollbarHover:"var(--ws-sidebar-scrollbar-hover)",
+  sidebarSectionLabel: "var(--ws-sidebar-section-label)",
+  sidebarIconBtnHover: "var(--ws-sidebar-icon-btn-hover)",
+
+  // Active nav row text/icon — defaults to existing values, overridable per-theme
+  sidebarActiveText:   "var(--ws-sidebar-active-text)",
+  sidebarActiveIcon:   "var(--ws-sidebar-active-icon)",
+
+  // Sidebar brand text and tooltip — default to page-context, inverted in E2 dark
+  sidebarBrandText:    "var(--ws-sidebar-brand-text)",
+  sidebarTooltipBg:    "var(--ws-sidebar-tooltip-bg)",
+  sidebarTooltipText:  "var(--ws-sidebar-tooltip-text)",
+
+  // Active pill — compound active state (sidebar micro-interaction)
+  activePillBg:        "var(--ws-active-pill-bg)",
+  activePillHover:     "var(--ws-active-pill-hover)",
+};
 
 /** Font family constant */
 export const f = "Inter, sans-serif";

@@ -8,7 +8,7 @@ import {
   GitFork,
   FileCode,
 } from "@phosphor-icons/react";
-import { Copy, Check, ArrowUp, RotateCcw, SquarePen, ChevronsLeft, Shield, Paperclip, Mic, Sparkles, PanelLeftClose, PanelRightClose, Maximize2, GitBranch as LucideGitBranch, FileCode as LucideFileCode, FlaskConical, CircleCheck, BookOpen, TriangleAlert, PanelRightOpen, PanelLeftOpen, Plus, Minus, Scan, Brain, Plug, Layers, ChevronDown, Eye } from "lucide-react";
+import { Copy, Check, ArrowUp, RotateCcw, SquarePen, ChevronsLeft, Shield, Paperclip, Mic, Sparkles, PanelLeftClose, PanelRightClose, Maximize2, GitBranch as LucideGitBranch, FileCode as LucideFileCode, FlaskConical, CircleCheck, BookOpen, TriangleAlert, PanelRightOpen, PanelLeftOpen, Plus, Minus, Scan, Brain, Plug, Layers, ChevronDown, Eye, ChevronRight } from "lucide-react";
 import { instructions } from "./instructionData";
 import { ws as baseWs, f, spring } from "@/shared/utils/contentTokens";
 import { ShimmerBar } from "@/shared/components/settings";
@@ -20,12 +20,12 @@ const mono = "'JetBrains Mono', 'Fira Code', 'Consolas', monospace";
 
 const ws = {
   ...baseWs,
-  page: "#EBE7E2",
-  topBar: "#FFFDF9",
-  statusBar: "#F5F0EB",
-  gutter: "#C4B5B0",
-  pillBg: "#E5E0DA",
-  pillText: "#78716C",
+  page: baseWs.sidebarBg,
+  topBar: baseWs.surface,
+  statusBar: baseWs.sidebarZone,
+  gutter: baseWs.disabled,
+  pillBg: baseWs.sidebarHoverBg,
+  pillText: baseWs.secondary,
 };
 
 const CHAT_W = 280;
@@ -853,6 +853,7 @@ interface VersionEntry {
   status: "draft" | "live" | "published";
   author: string;
   timeAgo: string;
+  content?: string;
 }
 
 const VERSIONS: VersionEntry[] = [
@@ -862,15 +863,24 @@ const VERSIONS: VersionEntry[] = [
   { version: 1, status: "published", author: "Ravi", timeAgo: "1mo" },
 ];
 
-function VersionPill({ currentVersion, versions, onRestore }: { currentVersion: number; versions: VersionEntry[]; onRestore: (fromVersion: number) => void }) {
+function VersionPill({
+  currentVersion,
+  previewVersion,
+  versions,
+  onPreview,
+}: {
+  currentVersion: number;
+  previewVersion: number | null;
+  versions: VersionEntry[];
+  onPreview: (version: number) => void;
+}) {
   const [open, setOpen] = useState(false);
   const [pillHover, setPillHover] = useState(false);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
-  const [confirmingVersion, setConfirmingVersion] = useState<number | null>(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const current = versions.find((v) => v.version === currentVersion);
+  const displayed = versions.find((v) => v.version === (previewVersion ?? currentVersion));
 
   // Open/close animation: show dropdown in DOM when opening, hide after close
   useEffect(() => {
@@ -885,7 +895,6 @@ function VersionPill({ currentVersion, versions, onRestore }: { currentVersion: 
     const handler = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
         setOpen(false);
-        setConfirmingVersion(null);
       }
     };
     document.addEventListener("mousedown", handler);
@@ -898,14 +907,13 @@ function VersionPill({ currentVersion, versions, onRestore }: { currentVersion: 
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setOpen(false);
-        setConfirmingVersion(null);
       }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
-  const pillActive = open || pillHover;
+  const pillActive = open || pillHover || previewVersion !== null;
 
   const pillStyle: React.CSSProperties = {
     display: "inline-flex",
@@ -916,10 +924,10 @@ function VersionPill({ currentVersion, versions, onRestore }: { currentVersion: 
     gap: 5,
     cursor: "pointer",
     border: pillActive
-      ? `1px solid rgba(124,58,237,0.2)`
+      ? `1px solid ${ws.primaryLight}`
       : `1px solid ${ws.border}`,
     background: pillActive ? ws.primaryLight : ws.elevated,
-    boxShadow: open ? `0 0 0 2px rgba(124,58,237,0.12)` : "none",
+    boxShadow: open ? `0 0 0 2px rgba(0,112,243,0.12)` : "none",
     transition: "background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease",
     fontFamily: f,
     outline: "none",
@@ -935,7 +943,7 @@ function VersionPill({ currentVersion, versions, onRestore }: { currentVersion: 
     <div ref={wrapperRef} style={{ position: "relative", display: "inline-flex" }}>
       {/* Pill button */}
       <button
-        onClick={() => { setOpen((p) => !p); setConfirmingVersion(null); }}
+        onClick={() => { setOpen((p) => !p); }}
         onMouseEnter={() => setPillHover(true)}
         onMouseLeave={() => setPillHover(false)}
         style={pillStyle}
@@ -951,10 +959,10 @@ function VersionPill({ currentVersion, versions, onRestore }: { currentVersion: 
             transition: "color 0.15s ease",
           }}
         >
-          v{currentVersion}
+          v{previewVersion ?? currentVersion}
         </span>
 
-        {current?.status === "live" ? (
+        {displayed?.status === "live" ? (
           <span
             style={{
               width: 6,
@@ -974,7 +982,7 @@ function VersionPill({ currentVersion, versions, onRestore }: { currentVersion: 
               transition: "color 0.15s ease",
             }}
           >
-            · {!current ? "Draft" : current.status === "draft" ? "Draft" : current.status}
+            · {!displayed ? "Draft" : displayed.status === "draft" ? "Draft" : displayed.status}
           </span>
         )}
 
@@ -1000,7 +1008,7 @@ function VersionPill({ currentVersion, versions, onRestore }: { currentVersion: 
             borderRadius: 10,
             background: ws.surface,
             border: `1px solid ${ws.border}`,
-            boxShadow: "0 4px 16px rgba(120,100,80,0.08), 0 1px 2px rgba(120,100,80,0.04)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
             overflow: "hidden",
             zIndex: 50,
             opacity: open ? 1 : 0,
@@ -1012,59 +1020,9 @@ function VersionPill({ currentVersion, versions, onRestore }: { currentVersion: 
         >
           {versions.map((entry, idx) => {
             const isCurrent = entry.version === currentVersion;
-            const isConfirming = confirmingVersion === entry.version;
+            const isPreviewing = previewVersion === entry.version;
             const isHovered = hoveredRow === entry.version;
             const isLast = idx === versions.length - 1;
-
-            // Inline restore confirmation row
-            if (isConfirming) {
-              return (
-                <div
-                  key={entry.version}
-                  style={{
-                    padding: "8px 14px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    background: ws.elevated,
-                    borderBottom: isLast ? "none" : `1px solid #F0EBE4`,
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        background: dotColor[entry.status],
-                        flexShrink: 0,
-                      }}
-                    />
-                    <span style={{ fontSize: 12, color: ws.body, fontFamily: f }}>
-                      Restore v{entry.version}?
-                    </span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-                    <span
-                      style={{ fontSize: 12, color: ws.muted_text, cursor: "pointer", transition: "color 0.15s" }}
-                      onClick={(e) => { e.stopPropagation(); setConfirmingVersion(null); }}
-                      onMouseEnter={(e) => { e.currentTarget.style.color = ws.secondary; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = ws.muted_text; }}
-                    >
-                      Cancel
-                    </span>
-                    <span
-                      style={{ fontSize: 12, fontWeight: 500, color: ws.primary, marginLeft: 8, cursor: "pointer", transition: "color 0.15s" }}
-                      onClick={(e) => { e.stopPropagation(); setOpen(false); setConfirmingVersion(null); onRestore(entry.version); }}
-                      onMouseEnter={(e) => { e.currentTarget.style.color = ws.primaryHover; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = ws.primary; }}
-                    >
-                      Restore
-                    </span>
-                  </div>
-                </div>
-              );
-            }
 
             return (
               <div
@@ -1072,17 +1030,19 @@ function VersionPill({ currentVersion, versions, onRestore }: { currentVersion: 
                 onMouseEnter={() => setHoveredRow(entry.version)}
                 onMouseLeave={() => setHoveredRow(null)}
                 onClick={() => {
-                  if (!isCurrent) setConfirmingVersion(entry.version);
+                  if (!isCurrent) { onPreview(entry.version); setOpen(false); }
                 }}
                 style={{
                   padding: "8px 14px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  background: isCurrent ? ws.elevated : isHovered ? "#EDE8E3" : "transparent",
-                  borderBottom: isLast ? "none" : `1px solid #F0EBE4`,
+                  background: isCurrent ? ws.elevated : isPreviewing ? ws.primaryLight : isHovered ? ws.hoverBg : "transparent",
+                  borderBottom: isLast ? "none" : `1px solid ${ws.divider}`,
+                  borderLeft: isPreviewing ? `2px solid ${ws.primary}` : "2px solid transparent",
                   cursor: isCurrent ? "default" : "pointer",
                   transition: "background-color 120ms ease",
+                  boxSizing: "border-box",
                 }}
               >
                 {/* Left: dot + version label */}
@@ -1100,7 +1060,7 @@ function VersionPill({ currentVersion, versions, onRestore }: { currentVersion: 
                     style={{
                       fontSize: 13,
                       fontWeight: isCurrent ? 600 : 500,
-                      color: ws.body,
+                      color: isPreviewing ? ws.primary : ws.body,
                       fontFamily: f,
                     }}
                   >
@@ -1110,12 +1070,12 @@ function VersionPill({ currentVersion, versions, onRestore }: { currentVersion: 
                   </span>
                 </div>
 
-                {/* Right: restore icon on hover (non-current), else author · timeAgo */}
+                {/* Right: chevron affordance on hover (non-current), else author · timeAgo */}
                 <div style={{ position: "relative", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
                   {!isCurrent && (
-                    <RotateCcw
+                    <ChevronRight
                       size={14}
-                      color={ws.primary}
+                      color={ws.muted_text}
                       style={{
                         position: "absolute",
                         opacity: isHovered ? 1 : 0,
@@ -1570,13 +1530,13 @@ export default function InstructionEditor() {
   const [chatWidth, setChatWidth] = useState(CHAT_W);
   const [dagWidth, setDagWidth] = useState(DAG_W);
   const [isDragging, setIsDragging] = useState(false);
-  const [backHover, setBackHover] = useState(false);
   const [mode, setMode] = useState<EditorMode>("viewing");
   const [content, setContent] = useState(instruction?.content ?? "");
   const [isLocked, setIsLocked] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [currentVersion, setCurrentVersion] = useState(4);
   const [isRestoring, setIsRestoring] = useState(false);
+  const [previewVersion, setPreviewVersion] = useState<number | null>(null);
   const columnsRef = useRef<HTMLDivElement>(null);
   const chatRestoreRef = useRef<((fromVersion: number) => void) | null>(null);
 
@@ -1589,6 +1549,17 @@ export default function InstructionEditor() {
     () => content.split("\n").map((_, i) => i + 1),
     [content]
   );
+
+  const versionContents = useMemo(() => {
+    const live = instruction?.content ?? "";
+    const lines = live.split("\n");
+    return {
+      4: live,
+      3: lines.slice(0, Math.max(1, Math.floor(lines.length * 0.85))).join("\n"),
+      2: lines.slice(0, Math.max(1, Math.floor(lines.length * 0.6))).join("\n"),
+      1: lines.slice(0, Math.max(1, Math.floor(lines.length * 0.3))).join("\n"),
+    } as Record<number, string>;
+  }, [instruction?.content]);
 
   const handleDragEnd = useCallback(() => setIsDragging(false), []);
 
@@ -1655,17 +1626,31 @@ export default function InstructionEditor() {
     setYamlState("open");
   };
 
-  const handleRestore = (fromVersion: number) => {
+  const handlePreviewVersion = (version: number) => {
+    if (version === currentVersion) return;
+    setPreviewVersion(version);
+    setMode("viewing");
+    setContent(versionContents[version] ?? instruction?.content ?? "");
+  };
+
+  const handleExitPreview = () => {
+    setPreviewVersion(null);
+    setContent(instruction?.content ?? "");
+    setMode("viewing");
+  };
+
+  const handleRestoreFromPreview = () => {
+    if (previewVersion === null) return;
+    const fromVersion = previewVersion;
     setIsRestoring(true);
     setTimeout(() => {
       const newVer = currentVersion + 1;
       setCurrentVersion(newVer);
-      setContent(instruction?.content ?? "");
+      // Restored content stays as-is (previewed version's content) — becomes new draft
+      setPreviewVersion(null);
       setMode("viewing");
       setIsRestoring(false);
-      if (chatRestoreRef.current) {
-        chatRestoreRef.current(fromVersion);
-      }
+      if (chatRestoreRef.current) chatRestoreRef.current(fromVersion);
     }, 400);
   };
 
@@ -1698,9 +1683,11 @@ export default function InstructionEditor() {
         flexDirection: "column",
         width: "100%",
         height: "100vh",
+        padding: "6px 0 0 0",
         background: ws.page,
         fontFamily: f,
         overflow: "hidden",
+        boxSizing: "border-box",
       }}
     >
       {/* ---------------------------------------------------------------- */}
@@ -1733,25 +1720,9 @@ export default function InstructionEditor() {
           flexShrink: 0,
         }}
       >
-        <button
-          onClick={() => navigate("/instructions")}
-          aria-label="Back to instructions"
-          onMouseEnter={() => setBackHover(true)}
-          onMouseLeave={() => setBackHover(false)}
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: 6,
-            border: "none",
-            background: backHover ? ws.elevated : "transparent",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <ArrowLeft size={14} color={ws.secondary} />
-        </button>
+        <GhostButton onClick={() => navigate("/instructions")} ariaLabel="Back to instructions" size={28}>
+          <ArrowLeft size={14} />
+        </GhostButton>
 
         <span
           style={{
@@ -1764,112 +1735,201 @@ export default function InstructionEditor() {
         </span>
 
         <div style={{ position: "relative" }}>
-          <VersionPill currentVersion={currentVersion} versions={VERSIONS} onRestore={handleRestore} />
+          <VersionPill
+            currentVersion={currentVersion}
+            previewVersion={previewVersion}
+            versions={VERSIONS}
+            onPreview={handlePreviewVersion}
+          />
         </div>
 
         <div style={{ flex: 1 }} />
 
-        {/* Mode-dependent right side */}
-        {mode === "viewing" && (
+        {/* Mode-dependent right side — hidden when previewing */}
+        {previewVersion === null && (
           <>
-            {/* Status */}
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <CircleCheck size={14} color={ws.success} />
-              <span style={{ fontSize: 11, fontWeight: 500, color: ws.body, fontFamily: f }}>Valid</span>
-            </div>
+            {mode === "viewing" && (
+              <>
+                {/* Status */}
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <CircleCheck size={14} color={ws.success} />
+                  <span style={{ fontSize: 11, fontWeight: 500, color: ws.body, fontFamily: f }}>Valid</span>
+                </div>
 
-            {/* Primary CTA: Edit */}
-            <button onClick={() => setMode("editing")} style={{
-              height: 30, padding: "0 16px", borderRadius: 8, border: "none",
-              background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
-              color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(124,58,237,0.2)",
-            }}>
-              Edit
-            </button>
+                {/* Primary CTA: Edit */}
+                <button onClick={() => setMode("editing")} style={{
+                  height: 30, padding: "0 16px", borderRadius: 8, border: "none",
+                  background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
+                  color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(0,112,243,0.2)",
+                }}>
+                  Edit
+                </button>
+              </>
+            )}
+
+            {mode === "editing" && (
+              <>
+                {/* Status: Unsaved */}
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: ws.warning }} />
+                  <span style={{ fontSize: 11, fontWeight: 500, color: "#B45309", fontFamily: f }}>Unsaved</span>
+                </div>
+
+                {/* Save Draft — ghost text */}
+                <span
+                  onClick={() => {}}
+                  style={{ fontSize: 11, fontWeight: 500, color: ws.secondary, cursor: "pointer", fontFamily: f, transition: "color 0.15s ease" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = ws.primary; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = ws.secondary; }}
+                >
+                  Save Draft
+                </span>
+
+                {/* Primary CTA: Validate */}
+                <button onClick={handleValidate} style={{
+                  height: 30, padding: "0 16px", borderRadius: 8, border: "none",
+                  background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
+                  color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(0,112,243,0.2)",
+                }}>
+                  Validate
+                </button>
+              </>
+            )}
+
+            {mode === "validating" && (
+              /* Status: Validating... with spinner */
+              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <RotateCcw size={14} color={ws.muted_text} style={{ animation: "spin 1s linear infinite" }} />
+                <span style={{ fontSize: 11, fontWeight: 500, color: ws.muted_text, fontFamily: f }}>Validating…</span>
+              </div>
+            )}
+
+            {mode === "validated" && (
+              <>
+                {/* Status: Valid */}
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <CircleCheck size={14} color={ws.success} />
+                  <span style={{ fontSize: 11, fontWeight: 500, color: ws.body, fontFamily: f }}>Valid</span>
+                </div>
+
+                {/* Save Draft — ghost text */}
+                <span
+                  onClick={() => {}}
+                  style={{ fontSize: 11, fontWeight: 500, color: ws.secondary, cursor: "pointer", fontFamily: f, transition: "color 0.15s ease" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = ws.primary; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = ws.secondary; }}
+                >
+                  Save Draft
+                </span>
+
+                {/* Primary CTA: Test */}
+                <button onClick={handleStartTest} style={{
+                  height: 30, padding: "0 16px", borderRadius: 8, border: "none",
+                  background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
+                  color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(0,112,243,0.2)",
+                  display: "flex", alignItems: "center", gap: 4,
+                }}>
+                  <FlaskConical size={12} color="#FFF" />
+                  Test
+                </button>
+              </>
+            )}
+
+            {mode === "testing" && (
+              <>
+                {/* Exit Test — ghost text */}
+                <span
+                  onClick={handleExitTest}
+                  style={{ fontSize: 11, fontWeight: 500, color: ws.secondary, cursor: "pointer", fontFamily: f, transition: "color 0.15s ease" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = ws.primary; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = ws.secondary; }}
+                >
+                  Exit Test
+                </span>
+
+                {/* Primary CTA: Publish */}
+                <button style={{
+                  height: 30, padding: "0 16px", borderRadius: 8, border: "none",
+                  background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
+                  color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(0,112,243,0.2)",
+                }}>
+                  Publish
+                </button>
+              </>
+            )}
           </>
         )}
 
-        {mode === "editing" && (
-          <>
-            {/* Status: Unsaved */}
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: ws.warning }} />
-              <span style={{ fontSize: 11, fontWeight: 500, color: "#B45309", fontFamily: f }}>Unsaved</span>
-            </div>
-
-            {/* Save Draft — ghost text */}
-            <span onClick={() => {}} style={{
-              fontSize: 11, fontWeight: 500, color: ws.secondary, cursor: "pointer", fontFamily: f,
-            }}>
-              Save Draft
-            </span>
-
-            {/* Primary CTA: Validate */}
-            <button onClick={handleValidate} style={{
-              height: 30, padding: "0 16px", borderRadius: 8, border: "none",
-              background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
-              color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(124,58,237,0.2)",
-            }}>
-              Validate
-            </button>
-          </>
-        )}
-
-        {mode === "validating" && (
-          /* Status: Validating... with spinner */
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <RotateCcw size={14} color={ws.muted_text} style={{ animation: "spin 1s linear infinite" }} />
-            <span style={{ fontSize: 11, fontWeight: 500, color: ws.muted_text, fontFamily: f }}>Validating…</span>
-          </div>
-        )}
-
-        {mode === "validated" && (
-          <>
-            {/* Status: Valid */}
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <CircleCheck size={14} color={ws.success} />
-              <span style={{ fontSize: 11, fontWeight: 500, color: ws.body, fontFamily: f }}>Valid</span>
-            </div>
-
-            {/* Save Draft — ghost text */}
-            <span onClick={() => {}} style={{
-              fontSize: 11, fontWeight: 500, color: ws.secondary, cursor: "pointer", fontFamily: f,
-            }}>
-              Save Draft
-            </span>
-
-            {/* Primary CTA: Test */}
-            <button onClick={handleStartTest} style={{
-              height: 30, padding: "0 16px", borderRadius: 8, border: "none",
-              background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
-              color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(124,58,237,0.2)",
-              display: "flex", alignItems: "center", gap: 4,
-            }}>
-              <FlaskConical size={12} color="#FFF" />
-              Test
-            </button>
-          </>
-        )}
-
-        {mode === "testing" && (
-          <>
-            {/* Exit Test — ghost text */}
-            <span onClick={handleExitTest} style={{
-              fontSize: 11, fontWeight: 500, color: ws.secondary, cursor: "pointer", fontFamily: f,
-            }}>
-              Exit Test
-            </span>
-
-            {/* Primary CTA: Publish */}
-            <button style={{
-              height: 30, padding: "0 16px", borderRadius: 8, border: "none",
-              background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
-              color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(124,58,237,0.2)",
-            }}>
-              Publish
-            </button>
-          </>
-        )}
+        {/* Preview cluster — shown when previewing an older version */}
+        {previewVersion !== null && (() => {
+          const previewEntry = VERSIONS.find((v) => v.version === previewVersion);
+          const statusPillStyle: Record<string, React.CSSProperties> = {
+            live: { background: ws.successBg, color: ws.successFg },
+            published: { background: ws.elevated, color: ws.secondary },
+            draft: { background: ws.primaryLight, color: ws.primary },
+          };
+          const sps = previewEntry ? statusPillStyle[previewEntry.status] : statusPillStyle.draft;
+          return (
+            <>
+              <Eye size={14} color={ws.primary} />
+              <span style={{ fontSize: 13, fontWeight: 500, color: ws.primary, fontFamily: f }}>
+                Viewing v{previewVersion}
+              </span>
+              <span style={{ fontSize: 12, fontWeight: 400, color: ws.secondary, fontFamily: f }}>
+                · {previewEntry?.author} · {previewEntry?.timeAgo} ago
+              </span>
+              {previewEntry && (
+                <span style={{
+                  display: "inline-flex", alignItems: "center",
+                  padding: "1px 7px", borderRadius: 999,
+                  fontSize: 10, fontWeight: 600,
+                  ...sps,
+                }}>
+                  {previewEntry.status.charAt(0).toUpperCase() + previewEntry.status.slice(1)}
+                </span>
+              )}
+              {/* Back to current */}
+              <button
+                onClick={handleExitPreview}
+                disabled={isRestoring}
+                style={{
+                  height: 30, padding: "0 12px", borderRadius: 8,
+                  border: "1px solid transparent", background: "transparent",
+                  color: ws.body, fontSize: 11, fontWeight: 500, fontFamily: f,
+                  cursor: isRestoring ? "default" : "pointer",
+                  opacity: isRestoring ? 0.5 : 1,
+                  transition: "background 0.15s ease",
+                  marginLeft: 8,
+                }}
+                onMouseEnter={(e) => { if (!isRestoring) e.currentTarget.style.background = ws.elevated; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+              >
+                Back to current
+              </button>
+              {/* Restore this version */}
+              <button
+                onClick={handleRestoreFromPreview}
+                disabled={isRestoring}
+                style={{
+                  height: 30, padding: "0 16px", borderRadius: 8, border: "none",
+                  background: ws.primary, cursor: isRestoring ? "default" : "pointer",
+                  fontSize: 11, fontWeight: 600, color: "#FFF", fontFamily: f,
+                  boxShadow: "0 1px 3px rgba(0,112,243,0.2)",
+                  display: "flex", alignItems: "center", gap: 4,
+                  opacity: isRestoring ? 0.7 : 1,
+                  transition: "opacity 0.15s ease",
+                }}
+              >
+                <RotateCcw
+                  size={12}
+                  color="#FFF"
+                  style={isRestoring ? { animation: "spin 1s linear infinite" } : undefined}
+                />
+                {isRestoring ? "Restoring…" : "Restore this version"}
+              </button>
+            </>
+          );
+        })()}
       </div>
 
       {/* ---------------------------------------------------------------- */}
@@ -1905,7 +1965,7 @@ export default function InstructionEditor() {
             overflow: "hidden",
             background: ws.surface,
             borderRadius: 10,
-            boxShadow: "0 1px 3px rgba(120,100,80,0.07), 0 4px 12px rgba(120,100,80,0.04)",
+            boxShadow: ws.cardShadow,
             transition: isDragging ? "none" : `width 320ms ${spring}`,
           }}
         >
@@ -1946,7 +2006,7 @@ export default function InstructionEditor() {
             overflow: "hidden",
             background: "#FFFFFF",
             borderRadius: 10,
-            boxShadow: "0 1px 3px rgba(120,100,80,0.07), 0 4px 12px rgba(120,100,80,0.04)",
+            boxShadow: ws.cardShadow,
             transition: `width 320ms ${spring}`,
           }}
         >
@@ -1994,7 +2054,8 @@ export default function InstructionEditor() {
                     flex: 1,
                     display: "flex",
                     overflow: "hidden",
-                    background: "#FFFFFF",
+                    background: previewVersion !== null ? ws.page : "#FFFFFF",
+                    transition: "background 0.15s ease",
                   }}
                 >
                   {/* Line numbers */}
@@ -2007,7 +2068,8 @@ export default function InstructionEditor() {
                       textAlign: "right",
                       userSelect: "none",
                       overflowY: "hidden",
-                      background: "#FFFFFF",
+                      background: previewVersion !== null ? ws.page : "#FFFFFF",
+                      transition: "background 0.15s ease",
                     }}
                   >
                     {lineNumbers.map((n) => (
@@ -2031,13 +2093,14 @@ export default function InstructionEditor() {
                   <textarea
                     value={content}
                     onChange={(e) => {
+                      if (previewVersion !== null) return;
                       setContent(e.target.value);
                       setIsLocked(false);
                       if (mode === "viewing" || mode === "validated") {
                         setMode("editing");
                       }
                     }}
-                    readOnly={mode === "viewing" || mode === "validating" || mode === "testing"}
+                    readOnly={previewVersion !== null || mode === "viewing" || mode === "validating" || mode === "testing"}
                     spellCheck={false}
                     style={{
                       flex: 1,
@@ -2051,6 +2114,7 @@ export default function InstructionEditor() {
                       color: isLocked ? ws.secondary : ws.body,
                       lineHeight: "20px",
                       caretColor: ws.primary,
+                      cursor: previewVersion !== null ? "default" : undefined,
                     }}
                   />
                 </div>
@@ -2085,7 +2149,7 @@ export default function InstructionEditor() {
             overflow: "hidden",
             background: ws.surface,
             borderRadius: 10,
-            boxShadow: "0 1px 3px rgba(120,100,80,0.07), 0 4px 12px rgba(120,100,80,0.04)",
+            boxShadow: ws.cardShadow,
             transition: isDragging ? "none" : `width 320ms ${spring}`,
           }}
         >

@@ -2,31 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { ChevronRight, Search, X } from "lucide-react";
 import { integrationLogoMap } from "./IntegrationLogos";
 
-const f = "Inter, sans-serif";
-
-const ws = {
-  page: "#FAF8F5", surface: "#FFFDF9", muted: "#F0EBE4",
-  elevated: "#F5F0EB", border: "#E7E0D8", divider: "#F0EBE4", inputBorder: "#D6D3D1",
-  heading: "#292524", body: "#44403C", secondary: "#78716C", muted_text: "#A8A29E",
-  disabled: "#D6D3D1", primary: "#7C3AED", primaryLight: "#EDE9FE",
-  success: "#10B981", error: "#E11D48", hoverBg: "#EDE8E3",
-};
+import { ws, f, spring } from "@/shared/utils/contentTokens";
+import { Card, SectionLabel, ShimmerBar, Toggle, AnimatedCheck, AnimatedCheckMuted, FilterChip, ListRow, DetailPanelShell } from "@/shared/components/settings";
 
 const GLOBAL_CSS = `
   @keyframes int-pulse {
     0%, 100% { opacity: 0.15; transform: scale(1); }
     50% { opacity: 0; transform: scale(1.6); }
-  }
-  @keyframes int-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-  @keyframes int-acheck-circle { 100% { stroke-dashoffset: 0; } }
-  @keyframes int-acheck-check { 100% { stroke-dashoffset: 0; } }
-  @keyframes int-toggle-glow {
-    0% { box-shadow: 0 0 0 0 rgba(124,58,237,0.4); }
-    50% { box-shadow: 0 0 0 4px rgba(124,58,237,0.15); }
-    100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
   }
 
   /* Thin scrollbar for page */
@@ -39,20 +21,6 @@ const GLOBAL_CSS = `
   [data-int-panel] *::-webkit-scrollbar { width: 0; display: none; }
   [data-int-panel] * { scrollbar-width: none; }
 `;
-
-const spring = "cubic-bezier(0.22, 1, 0.36, 1)";
-
-/* ── Shared components ───────────────────────────────────────── */
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <h3 style={{ fontSize: 11, fontWeight: 500, color: ws.muted_text, margin: "0 0 10px", fontFamily: f }}>{children}</h3>
-  );
-}
-
-function Card({ children }: { children: React.ReactNode }) {
-  return <div style={{ backgroundColor: ws.surface, border: `1px solid ${ws.border}`, borderRadius: 14, overflow: "hidden" }}>{children}</div>;
-}
 
 function ColorCircle({ color }: { color: string }) {
   return <div style={{ width: 20, height: 20, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />;
@@ -67,56 +35,6 @@ function HealthDot({ label, color }: { label: string; color: string }) {
       </span>
       {label}
     </span>
-  );
-}
-
-function Toggle({ on, onChange, pulsing }: { on: boolean; onChange: (v: boolean) => void; pulsing?: boolean }) {
-  return (
-    <button role="switch" aria-checked={on} onClick={() => onChange(!on)} style={{
-      width: 36, height: 20, borderRadius: 10, border: "none", cursor: "pointer",
-      backgroundColor: "#F0EBE4", position: "relative",
-      transition: "background-color 0.2s", flexShrink: 0, padding: 0,
-    }}>
-      <span style={{
-        position: "absolute", top: 2, left: on ? 18 : 2,
-        width: 16, height: 16, borderRadius: "50%",
-        backgroundColor: on ? "#7C3AED" : "#A8A29E",
-        transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
-        animation: pulsing ? "int-toggle-glow 0.8s ease-out" : "none",
-      }} />
-    </button>
-  );
-}
-
-/* ── Skeleton shimmer ────────────────────────────────────────── */
-
-function ShimmerBar({ width, height, mb = 0, delay = 0 }: { width: string | number; height: number; mb?: number; delay?: number }) {
-  return <div style={{ width, height, borderRadius: 6, marginBottom: mb, background: `linear-gradient(90deg, ${ws.muted} 25%, ${ws.elevated} 50%, ${ws.muted} 75%)`, backgroundSize: "200% 100%", animation: `int-shimmer 1.5s ease-in-out infinite`, animationDelay: `${delay}ms` }} />;
-}
-
-/* ── Animated checkmark (SVG stroke-dashoffset) ──────────────── */
-
-function AnimatedCheck({ size = 36 }: { size?: number }) {
-  const [k] = useState(() => Date.now());
-  return (
-    <svg key={k} width={size} height={size} viewBox="0 0 52 52" style={{ display: "block" }}>
-      <circle cx="26" cy="26" r="24" fill="none" stroke="#10B981" strokeWidth="2"
-        style={{ strokeDasharray: 151, strokeDashoffset: 151, animation: "int-acheck-circle 0.5s cubic-bezier(0.65,0,0.45,1) forwards" }} />
-      <path fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"
-        style={{ strokeDasharray: 36, strokeDashoffset: 36, animation: "int-acheck-check 0.3s cubic-bezier(0.65,0,0.45,1) 0.5s forwards" }} />
-    </svg>
-  );
-}
-
-function AnimatedCheckMuted({ size = 36 }: { size?: number }) {
-  const [k] = useState(() => Date.now());
-  return (
-    <svg key={k} width={size} height={size} viewBox="0 0 52 52" style={{ display: "block" }}>
-      <circle cx="26" cy="26" r="24" fill="none" stroke="#A8A29E" strokeWidth="2"
-        style={{ strokeDasharray: 151, strokeDashoffset: 151, animation: "int-acheck-circle 0.5s cubic-bezier(0.65,0,0.45,1) forwards" }} />
-      <path fill="none" stroke="#A8A29E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"
-        style={{ strokeDasharray: 36, strokeDashoffset: 36, animation: "int-acheck-check 0.3s cubic-bezier(0.65,0,0.45,1) 0.5s forwards" }} />
-    </svg>
   );
 }
 
@@ -868,18 +786,7 @@ export default function IntegrationsV5() {
     const Logo = integrationLogoMap[item.id];
     const isSelected = item.id === selectedId;
     return (
-      <div key={item.id} role="button" tabIndex={0} aria-selected={isSelected}
-        onClick={() => handleSelectItem(item.id)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSelectItem(item.id); } }}
-        style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "10px 14px", cursor: "pointer", transition: "background-color 0.15s",
-          borderBottom: last ? "none" : `1px solid ${ws.divider}`,
-          backgroundColor: isSelected ? ws.elevated : "transparent",
-        }}
-        onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = ws.hoverBg; }}
-        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = isSelected ? ws.elevated : "transparent"; }}
-      >
+      <ListRow key={item.id} onClick={() => handleSelectItem(item.id)} selected={isSelected} last={last}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
           <div style={{ flexShrink: 0 }}>{Logo ? <Logo size={20} /> : <ColorCircle color={item.color} />}</div>
           <span style={{ fontSize: 13, fontWeight: 500, color: ws.body, fontFamily: f, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.name}</span>
@@ -890,7 +797,7 @@ export default function IntegrationsV5() {
           {!item.enabled && <span style={{ fontSize: 12, color: ws.muted_text, fontFamily: f, whiteSpace: "nowrap" }}>{item.description}</span>}
           <ChevronRight size={14} color={ws.disabled} />
         </div>
-      </div>
+      </ListRow>
     );
   }
 
@@ -943,25 +850,9 @@ export default function IntegrationsV5() {
 
             {/* Filter chips */}
             <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 16 }}>
-              {categories.map((cat) => {
-                const isActive = activeCategory === cat.id;
-                return (
-                  <button key={cat.id} onClick={() => { setActiveCategory(cat.id); setSearchQuery(""); }}
-                    style={{
-                      height: 26, borderRadius: 8, padding: "0 10px", fontSize: 11, fontFamily: f,
-                      fontWeight: isActive ? 500 : "normal",
-                      cursor: "pointer", transition: "background-color 0.15s, color 0.15s, border-color 0.15s",
-                      border: isActive ? "1px solid transparent" : `1px solid ${ws.border}`,
-                      backgroundColor: isActive ? ws.primaryLight : "transparent",
-                      color: isActive ? ws.primary : ws.secondary,
-                    }}
-                    onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = "#F5F0EB"; }}
-                    onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = isActive ? ws.primaryLight : "transparent"; }}
-                  >
-                    {cat.label}
-                  </button>
-                );
-              })}
+              {categories.map((cat) => (
+                <FilterChip key={cat.id} label={cat.label} active={activeCategory === cat.id} onClick={() => { setActiveCategory(cat.id); setSearchQuery(""); }} />
+              ))}
             </div>
 
             {/* List content */}
@@ -1012,29 +903,9 @@ export default function IntegrationsV5() {
       </div>
 
       {/* Fixed detail panel — pinned to viewport, right: 32px matches SettingsLayout padding */}
-      <div data-int-panel style={{
-        position: "fixed",
-        top: 130,
-        right: 32,
-        width: 480,
-        height: "calc(100vh - 148px)",
-        transform: panelOpen ? "translateX(0)" : "translateX(calc(100% + 32px))",
-        opacity: panelOpen ? 1 : 0,
-        transition: `transform 0.32s ${spring}, opacity 0.24s ${spring}`,
-        pointerEvents: panelOpen ? "auto" : "none",
-        zIndex: 10,
-      }}>
-        <div style={{
-          width: "100%", height: "100%", borderRadius: 14,
-          backgroundColor: ws.surface, border: `1px solid ${ws.border}`,
-          boxShadow: "0 4px 16px -4px rgba(0,0,0,0.08), 0 1px 4px -1px rgba(0,0,0,0.04)",
-          overflow: "hidden",
-        }}>
-          <div style={{ width: "100%", height: "100%", opacity: panelFading ? 0 : 1, transition: "opacity 0.2s ease" }}>
-            {renderedItem && <DetailPanel item={renderedItem} onClose={handleClosePanel} />}
-          </div>
-        </div>
-      </div>
+      <DetailPanelShell open={panelOpen} onClose={handleClosePanel} isMobile={false} isDesktop={true} dataAttr="int-panel" fading={panelFading} top={130}>
+        {renderedItem && <DetailPanel item={renderedItem} onClose={handleClosePanel} />}
+      </DetailPanelShell>
     </>
   );
 }

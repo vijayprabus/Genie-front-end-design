@@ -2,18 +2,8 @@ import { useState } from "react";
 import type { CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
 
-const f = "Inter, sans-serif";
-
-const ws = {
-  page: "#FAF8F5", surface: "#FFFDF9", sidebar: "#F5F0EB", muted: "#F0EBE4",
-  elevated: "#F5F0EB", border: "#E7E0D8", divider: "#F0EBE4", inputBorder: "#D6D3D1",
-  heading: "#292524", body: "#44403C", secondary: "#78716C", muted_text: "#A8A29E",
-  disabled: "#D6D3D1", primary: "#7C3AED", primaryHover: "#6D28D9",
-  primaryLight: "#EDE9FE", primaryDark: "#5B21B6", success: "#10B981",
-  successFg: "#065F46", successBg: "#ECFDF5", warning: "#F59E0B",
-  warningFg: "#92400E", warningBg: "#FFFBEB", error: "#E11D48",
-  errorFg: "#9F1239", errorBg: "#FFF1F2", hoverBg: "#EDE8E3",
-};
+import { ws, f } from "@/shared/utils/contentTokens";
+import { Card } from "@/shared/components/settings";
 
 const actionItems = [
   { id: 1, urgent: true, title: "Cash Recon Specialist is paused", badge: "Blocked",
@@ -42,21 +32,17 @@ const workforceData = [
     statTrend: "99.8% success", trendColor: ws.success },
   { name: "KYC Verification Worker", desc: "Customer verification & compliance",
     dotColor: ws.success, hollow: false, draft: false, statValue: "12 today",
-    statTrend: "91.7% success", trendColor: "#F59E0B" },
+    statTrend: "91.7% success", trendColor: ws.warning },
   { name: "Cash Recon Specialist", desc: "Bank statement reconciliation",
-    dotColor: "#F59E0B", hollow: false, draft: false, statValue: "Paused",
+    dotColor: ws.warning, hollow: false, draft: false, statValue: "Paused",
     statTrend: "74% success", trendColor: ws.muted_text },
   { name: "Doc Processing Worker", desc: "Document intake & classification",
     dotColor: "#D6D3D1", hollow: true, draft: true, statValue: "Draft",
     statTrend: "Not deployed", trendColor: ws.disabled },
 ] as const;
 
-const cardStyle: CSSProperties = {
-  backgroundColor: ws.surface, border: `1px solid ${ws.border}`,
-  borderRadius: 14, overflow: "hidden",
-};
 const sectionLabel: CSSProperties = {
-  fontSize: 10, fontWeight: 600, color: "#A8A29E", letterSpacing: 0.3,
+  fontSize: 10, fontWeight: 600, color: ws.muted_text, letterSpacing: 0.3,
   textTransform: "uppercase", fontFamily: f, marginBottom: 8,
 };
 
@@ -64,11 +50,11 @@ function StatCell({ value, label, sub, amber }: { value: string; label: string; 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3,
       ...(amber ? { background: ws.warningBg, borderRadius: 8, padding: "8px 12px" } : {}) }}>
-      <span style={{ fontSize: 22, fontWeight: 700, color: amber ? "#F59E0B" : ws.heading, fontFamily: f, lineHeight: 1 }}>
+      <span style={{ fontSize: 22, fontWeight: 700, color: amber ? ws.warning : ws.heading, fontFamily: f, lineHeight: 1 }}>
         {value}
       </span>
       <span style={{ fontSize: 9, fontWeight: 500, textTransform: "uppercase",
-        color: amber ? "#92400E" : ws.muted_text, letterSpacing: 0.3, fontFamily: f }}>
+        color: amber ? ws.warningFg : ws.muted_text, letterSpacing: 0.3, fontFamily: f }}>
         {label}
       </span>
       <span style={{ fontSize: 10, color: ws.muted_text, fontFamily: f }}>{sub}</span>
@@ -83,15 +69,15 @@ function SparklineBand() {
     <svg viewBox="0 0 1000 56" width="100%" height={56} preserveAspectRatio="none" style={{ display: "block" }}>
       <defs>
         <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#7C3AED14" />
+          <stop offset="0%" stopColor={ws.primaryLight} stopOpacity={0.08} />
           <stop offset="100%" stopColor="transparent" />
         </linearGradient>
       </defs>
       <path d={area} fill="url(#sparkGrad)" />
-      <path d={line} fill="none" stroke="#7C3AED40" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={570} cy={15} r={4} fill={ws.primary} stroke="#FFFDF9" strokeWidth={2} />
+      <path d={line} fill="none" stroke={ws.primary} strokeOpacity={0.25} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={570} cy={15} r={4} fill={ws.primary} stroke={ws.surface} strokeWidth={2} />
       {["M","T","W","T","F","S","S"].map((d, i) => (
-        <text key={i} x={71 + i * 143} y={54} textAnchor="middle" fontSize={9} fill="#A8A29E" fontFamily={f}>{d}</text>
+        <text key={i} x={71 + i * 143} y={54} textAnchor="middle" fontSize={9} fill={ws.muted_text} fontFamily={f}>{d}</text>
       ))}
     </svg>
   );
@@ -105,14 +91,14 @@ function ActionRow({ item, last, navigate }: {
   const btnBase = { fontSize: 11, fontWeight: 500, padding: "4px 10px", borderRadius: 6,
     cursor: "pointer" as const, whiteSpace: "nowrap" as const, fontFamily: f, flexShrink: 0 };
   const btnStyle: CSSProperties = item.primary
-    ? { ...btnBase, background: btnHovered ? ws.primaryHover : ws.primary, color: "#FFF", border: "none" }
+    ? { ...btnBase, background: btnHovered ? ws.primaryHover : ws.primary, color: ws.onPrimary, border: "none" }
     : { ...btnBase, background: btnHovered ? ws.elevated : ws.surface, color: ws.body, border: `1px solid ${ws.border}` };
 
   return (
     <div
       style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px",
         backgroundColor: hovered ? ws.hoverBg : "transparent", transition: "background-color 0.1s ease",
-        cursor: "pointer", ...(item.urgent ? { borderLeft: "3px solid #EF4444" } : {}),
+        cursor: "pointer", ...(item.urgent ? { borderLeft: `3px solid ${ws.error}` } : {}),
         ...(!last ? { borderBottom: `1px solid ${ws.divider}` } : {}) }}
       onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       onClick={() => navigate(item.route)}
@@ -168,7 +154,7 @@ function WorkerRow({ worker, last }: { worker: (typeof workforceData)[number]; l
       </div>
       <div style={{ width: 100, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
         <span style={{ fontSize: 12, fontWeight: 600, fontFamily: f,
-          color: worker.draft ? ws.muted_text : worker.statValue === "Paused" ? "#F59E0B" : ws.heading }}>
+          color: worker.draft ? ws.muted_text : worker.statValue === "Paused" ? ws.warning : ws.heading }}>
           {worker.statValue}
         </span>
         <span style={{ fontSize: 10, color: worker.trendColor, fontFamily: f }}>{worker.statTrend}</span>
@@ -184,9 +170,9 @@ export default function HomePage() {
       <div style={{ flex: 1, overflow: "auto", background: ws.page, padding: 28 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           {/* Hero Card — Stacked Greeting + Sparkline Band */}
-          <div style={cardStyle}>
+          <Card>
             <div style={{ padding: 28 }}>
-              <span style={{ fontSize: 36, fontWeight: 300, color: "#78716C", lineHeight: 1.15, fontFamily: f }}>
+              <span style={{ fontSize: 36, fontWeight: 300, color: ws.secondary, lineHeight: 1.15, fontFamily: f }}>
                 Good morning,
               </span>
               <br />
@@ -201,26 +187,26 @@ export default function HomePage() {
               <StatCell value="97.4%" label="AUTOMATION RATE" sub="No human needed" />
               <StatCell value="4" label="NEEDS ATTENTION" sub="HITL + blocked" amber />
             </div>
-          </div>
+          </Card>
 
           {/* Needs Your Action */}
           <div>
             <div style={sectionLabel}>NEEDS YOUR ACTION (4)</div>
-            <div style={cardStyle}>
+            <Card>
               {actionItems.map((item, i) => (
                 <ActionRow key={item.id} item={item} last={i === actionItems.length - 1} navigate={navigate} />
               ))}
-            </div>
+            </Card>
           </div>
 
           {/* Your Workforce Today */}
           <div>
             <div style={{ ...sectionLabel, marginTop: 16 }}>YOUR WORKFORCE TODAY</div>
-            <div style={cardStyle}>
+            <Card>
               {workforceData.map((worker, i) => (
                 <WorkerRow key={worker.name} worker={worker} last={i === workforceData.length - 1} />
               ))}
-            </div>
+            </Card>
           </div>
         </div>
       </div>

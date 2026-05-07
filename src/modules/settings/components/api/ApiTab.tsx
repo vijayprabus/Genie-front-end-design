@@ -5,18 +5,10 @@ import {
   mockWebhooks,
   mockDocLinks,
 } from "@/modules/settings/data/mockData";
+import { ws as baseWs, f } from "@/shared/utils/contentTokens";
+import { Card } from "@/shared/components/settings";
 
-const f = "Inter, sans-serif";
-
-const ws = {
-  page: "#FAF8F5", surface: "#FFFDF9", sidebar: "#F5F0EB", muted: "#F0EBE4",
-  elevated: "#F5F0EB", border: "#E7E0D8", divider: "#F0EBE4", inputBorder: "#D6D3D1",
-  heading: "#292524", body: "#44403C", secondary: "#78716C", muted_text: "#A8A29E",
-  disabled: "#D6D3D1", primary: "#7C3AED", primaryHover: "#6D28D9", primaryLight: "#EDE9FE",
-  primaryDark: "#5B21B6", success: "#10B981", successFg: "#065F46", successBg: "#ECFDF5",
-  warning: "#F59E0B", warningFg: "#92400E", warningBg: "#FFFBEB", error: "#E11D48",
-  errorFg: "#9F1239", errorBg: "#FFF1F2", hoverBg: "#EDE8E3",
-};
+const ws = { ...baseWs, sidebar: baseWs.sidebarZone };
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -70,13 +62,13 @@ export default function ApiTab() {
       <div style={{ marginBottom: 32 }}>
         <SectionLabel>API Keys</SectionLabel>
 
-        <div>
+        <Card>
           {mockApiKeys.map((key, i) => (
             <div
               key={key.id}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "12px 0",
+                padding: "12px 16px",
                 borderBottom: i < mockApiKeys.length - 1 ? `1px solid ${ws.divider}` : "none",
               }}
             >
@@ -107,7 +99,7 @@ export default function ApiTab() {
               </div>
             </div>
           ))}
-        </div>
+        </Card>
 
         <div style={{ marginTop: 16 }}>
           <button
@@ -115,7 +107,7 @@ export default function ApiTab() {
             style={{
               display: "flex", alignItems: "center", gap: 6,
               padding: "7px 16px", borderRadius: 8, border: "none",
-              backgroundColor: ws.primary, color: "#FFF",
+              backgroundColor: ws.primary, color: ws.onPrimary,
               fontSize: 13, fontWeight: 500, fontFamily: f, cursor: "pointer",
             }}
           >
@@ -129,13 +121,13 @@ export default function ApiTab() {
       <div style={{ marginBottom: 32 }}>
         <SectionLabel>Webhooks</SectionLabel>
 
-        <div>
+        <Card>
           {mockWebhooks.map((webhook, i) => (
             <div
               key={webhook.id}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "12px 0",
+                padding: "12px 16px",
                 borderBottom: i < mockWebhooks.length - 1 ? `1px solid ${ws.divider}` : "none",
               }}
             >
@@ -152,20 +144,20 @@ export default function ApiTab() {
               </span>
             </div>
           ))}
-        </div>
+        </Card>
       </div>
 
       {/* Documentation section */}
       <div>
         <SectionLabel>Documentation</SectionLabel>
 
-        <div>
+        <Card>
           {mockDocLinks.map((doc, idx) => (
             <div
               key={idx}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "12px 0",
+                padding: "12px 16px",
                 borderBottom: idx < mockDocLinks.length - 1 ? `1px solid ${ws.divider}` : "none",
               }}
             >
@@ -183,7 +175,7 @@ export default function ApiTab() {
               </GhostButton>
             </div>
           ))}
-        </div>
+        </Card>
       </div>
     </div>
   );

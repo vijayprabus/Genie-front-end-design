@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  MagnifyingGlass,
   X,
   Eye,
   Code,
@@ -10,16 +9,14 @@ import {
   Check,
   GitBranch,
   PencilSimple,
-  Warning,
   Bell,
   CaretRight,
   SpinnerGap,
 } from "@phosphor-icons/react";
-import { Search } from "lucide-react";
 import { useBreakpoint } from "@/shared/hooks/useBreakpoint";
 import { instructions, type Instruction, type PublicationStatus } from "./instructionData";
 import { ws as baseWs, f } from "@/shared/utils/contentTokens";
-import { ShimmerBar } from "@/shared/components/settings";
+import { ShimmerBar, SearchBar, Card } from "@/shared/components/settings";
 
 const spring = "cubic-bezier(0.32, 0.72, 0, 1)";
 
@@ -92,7 +89,7 @@ function ListSkeleton() {
         <ShimmerBar width={420} height={13} delay={60} />
       </div>
       {/* List card */}
-      <div style={{ borderRadius: 10, border: `1px solid ${ws.border}`, overflow: "hidden", backgroundColor: ws.surface }}>
+      <Card>
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <div key={i} style={{
             display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 16px", height: 44,
@@ -106,7 +103,7 @@ function ListSkeleton() {
             </div>
           </div>
         ))}
-      </div>
+      </Card>
     </div>
   );
 }
@@ -366,8 +363,8 @@ function InstructionPanel({
         borderRadius: 14,
         margin: "10px 10px 10px 0",
         height: "calc(100% - 20px)",
-        border: `1px solid ${ws.border}`,
-        boxShadow: "0 4px 16px -4px rgba(0,0,0,0.08), 0 1px 4px -1px rgba(0,0,0,0.04)",
+        border: ws.cardBorder,
+        boxShadow: ws.cardShadow,
         transform: visible ? "translateX(0)" : "translateX(100%)",
         transition: `transform 0.28s ${spring}`,
         overflow: "hidden",
@@ -497,10 +494,8 @@ export default function InstructionsPage() {
   const isDesktop = bp === "desktop";
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchExpanded, setSearchExpanded] = useState(false);
   const [panelKey, setPanelKey] = useState(0);
   const [pageLoading, setPageLoading] = useState(true);
-  const searchRef = useRef<HTMLInputElement>(null);
 
   // Page load simulation
   useEffect(() => {
@@ -523,32 +518,6 @@ export default function InstructionsPage() {
       setPanelKey((k) => k + 1);
     }
   };
-
-  // Focus search when expanded
-  useEffect(() => {
-    if (searchExpanded && searchRef.current) searchRef.current.focus();
-  }, [searchExpanded]);
-
-  // ⌘K shortcut
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setSearchExpanded(true);
-      }
-      if (e.key === "Escape" && searchExpanded) {
-        setSearchExpanded(false);
-        setSearchQuery("");
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [searchExpanded]);
-
-  const collapseSearch = useCallback(() => {
-    setSearchExpanded(false);
-    setSearchQuery("");
-  }, []);
 
   return (
     <div style={{ display: "flex", width: "100%", height: "100%", fontFamily: f, overflow: "hidden" }}>
@@ -578,54 +547,10 @@ export default function InstructionsPage() {
             <span style={{ fontSize: 12, fontWeight: 500, color: ws.secondary, fontFamily: f }}>Instructions</span>
           </div>
 
-          {/* Right: search + bell */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "flex-end", flex: searchExpanded ? 1 : undefined }}>
-            {searchExpanded ? (
-              <div
-                style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  width: 320, height: 34, borderRadius: 10,
-                  backgroundColor: ws.surface, border: `1.5px solid ${ws.muted}`,
-                  padding: "0 12px", transition: "width 0.2s ease",
-                }}
-              >
-                <Search size={15} color={ws.muted} style={{ flexShrink: 0 }} />
-                <input
-                  ref={searchRef}
-                  type="text"
-                  placeholder="Search instructions..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{ flex: 1, border: "none", outline: "none", backgroundColor: "transparent", fontSize: 13, fontFamily: f, color: ws.body }}
-                />
-                <button
-                  onClick={collapseSearch}
-                  style={{ background: "none", border: "none", cursor: "pointer", padding: 2, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, outline: "none" }}
-                >
-                  <X size={14} color={ws.muted} />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setSearchExpanded(true)}
-                style={{
-                  height: 30, borderRadius: 8, border: `1px solid ${ws.border}`,
-                  backgroundColor: "transparent", display: "flex", alignItems: "center",
-                  gap: 6, padding: "0 10px", cursor: "pointer", outline: "none",
-                  transition: "border-color 0.15s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = ws.muted; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = ws.border; }}
-              >
-                <Search size={isMobile ? 18 : 14} color={ws.muted} />
-                {!isMobile && <span style={{ fontSize: 12, color: ws.muted, fontFamily: f }}>Search</span>}
-                {!isMobile && <span style={{ backgroundColor: ws.mutedBg, borderRadius: 4, padding: "2px 6px", fontSize: 10, fontWeight: 600, color: ws.muted }}>/</span>}
-              </button>
-            )}
-
-            {/* Bell */}
+          {/* Right: bell */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "flex-end" }}>
             <button
-              onClick={() => toast("Notifications coming soon")}
+              onClick={() => {}}
               style={{
                 background: "none", border: "none", cursor: "pointer",
                 padding: 4, display: "flex", alignItems: "center", justifyContent: "center",
@@ -667,7 +592,7 @@ export default function InstructionsPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 <h1 style={{
                   margin: 0,
-                  fontSize: 20,
+                  fontSize: isMobile ? 24 : 20,
                   fontWeight: 700,
                   color: ws.heading,
                   fontFamily: f,
@@ -675,21 +600,24 @@ export default function InstructionsPage() {
                 }}>
                   Instructions
                 </h1>
-                <p style={{ margin: 0, fontSize: 13, color: ws.muted, lineHeight: 1.4, fontFamily: f }}>
+                <p style={{ margin: 0, fontSize: isMobile ? 14 : 13, color: ws.secondary, lineHeight: 1.4, fontFamily: f }}>
                   Manage the instructions.md files that control how each Worker behaves in production.
                 </p>
               </div>
 
+              {/* Hero search — caps at 480, shrinks when the detail panel opens */}
+              <div style={{ marginTop: -4, maxWidth: 480 }}>
+                <SearchBar
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Search instructions..."
+                  variant="prominent"
+                  width="100%"
+                />
+              </div>
 
               {/* List */}
-              <div
-                style={{
-                  borderRadius: 10,
-                  backgroundColor: ws.surface,
-                  border: `1px solid ${ws.border}`,
-                  overflow: "hidden",
-                }}
-              >
+              <Card>
                 {filtered.map((item) => (
                   <InstructionRow
                     key={item.id}
@@ -704,7 +632,7 @@ export default function InstructionsPage() {
                     <p style={{ fontSize: 13, color: ws.muted, fontFamily: f }}>No instructions match your search</p>
                   </div>
                 )}
-              </div>
+              </Card>
             </>
           )}
         </div>

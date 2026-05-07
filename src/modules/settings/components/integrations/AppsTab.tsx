@@ -3,58 +3,27 @@ import { ChevronRight, X } from "lucide-react";
 import { integrationLogoMap } from "./IntegrationLogos";
 import { useBreakpoint } from "@/shared/hooks/useBreakpoint";
 import { useLayoutContext } from "@/modules/settings/components/SettingsLayout";
-
-const f = "Inter, sans-serif";
-
-const ws = {
-  page: "#FAF8F5", surface: "#FFFDF9", muted: "#F0EBE4",
-  elevated: "#F5F0EB", border: "#E7E0D8", divider: "#F0EBE4", inputBorder: "#D6D3D1",
-  heading: "#292524", body: "#44403C", secondary: "#78716C", muted_text: "#A8A29E",
-  disabled: "#D6D3D1", primary: "#7C3AED", primaryLight: "#EDE9FE",
-  success: "#10B981", error: "#E11D48", hoverBg: "#EDE8E3",
-};
+import { ws, f } from "@/shared/utils/contentTokens";
+import { Card, SectionLabel, ShimmerBar, Toggle, AnimatedCheck, AnimatedCheckMuted, FilterChip, ListRow, DetailPanelShell, SearchBar } from "@/shared/components/settings";
 
 const GLOBAL_CSS = `
   @keyframes int-pulse {
     0%, 100% { opacity: 0.15; transform: scale(1); }
     50% { opacity: 0; transform: scale(1.6); }
   }
-  @keyframes int-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-  @keyframes int-acheck-circle { 100% { stroke-dashoffset: 0; } }
-  @keyframes int-acheck-check { 100% { stroke-dashoffset: 0; } }
-  @keyframes int-toggle-glow {
-    0% { box-shadow: 0 0 0 0 rgba(124,58,237,0.4); }
-    50% { box-shadow: 0 0 0 4px rgba(124,58,237,0.15); }
-    100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
-  }
 
   /* Thin scrollbar for page */
   #main-content::-webkit-scrollbar { width: 6px; }
   #main-content::-webkit-scrollbar-track { background: transparent; }
-  #main-content::-webkit-scrollbar-thumb { background: #D6D3D1; border-radius: 3px; }
-  #main-content::-webkit-scrollbar-thumb:hover { background: #A8A29E; }
-  #main-content { scrollbar-width: thin; scrollbar-color: #D6D3D1 transparent; }
+  #main-content::-webkit-scrollbar-thumb { background: var(--ws-input-border); border-radius: 3px; }
+  #main-content::-webkit-scrollbar-thumb:hover { background: var(--ws-muted-text); }
+  #main-content { scrollbar-width: thin; scrollbar-color: var(--ws-input-border) transparent; }
   /* Hide scrollbar inside the detail panel — target any scrollable child of the fixed panel */
   [data-int-panel] *::-webkit-scrollbar { width: 0; display: none; }
   [data-int-panel] * { scrollbar-width: none; }
 `;
 
 const spring = "cubic-bezier(0.22, 1, 0.36, 1)";
-
-/* ── Shared components ───────────────────────────────────────── */
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <h3 style={{ fontSize: 11, fontWeight: 500, color: ws.muted_text, margin: "0 0 10px", fontFamily: f }}>{children}</h3>
-  );
-}
-
-function Card({ children }: { children: React.ReactNode }) {
-  return <div style={{ backgroundColor: ws.surface, border: `1px solid ${ws.border}`, borderRadius: 14, overflow: "hidden" }}>{children}</div>;
-}
 
 function ColorCircle({ color }: { color: string }) {
   return <div style={{ width: 20, height: 20, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />;
@@ -72,62 +41,13 @@ function HealthDot({ label, color }: { label: string; color: string }) {
   );
 }
 
-function Toggle({ on, onChange, pulsing }: { on: boolean; onChange: (v: boolean) => void; pulsing?: boolean }) {
-  return (
-    <button role="switch" aria-checked={on} onClick={() => onChange(!on)} style={{
-      width: 36, height: 20, borderRadius: 10, border: "none", cursor: "pointer",
-      backgroundColor: "#F0EBE4", position: "relative",
-      transition: "background-color 0.2s", flexShrink: 0, padding: 0,
-    }}>
-      <span style={{
-        position: "absolute", top: 2, left: on ? 18 : 2,
-        width: 16, height: 16, borderRadius: "50%",
-        backgroundColor: on ? "#7C3AED" : "#A8A29E",
-        transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
-        animation: pulsing ? "int-toggle-glow 0.8s ease-out" : "none",
-      }} />
-    </button>
-  );
-}
-
-/* ── Skeleton shimmer ────────────────────────────────────────── */
-
-function ShimmerBar({ width, height, mb = 0, delay = 0 }: { width: string | number; height: number; mb?: number; delay?: number }) {
-  return <div style={{ width, height, borderRadius: 6, marginBottom: mb, background: `linear-gradient(90deg, ${ws.muted} 25%, ${ws.elevated} 50%, ${ws.muted} 75%)`, backgroundSize: "200% 100%", animation: `int-shimmer 1.5s ease-in-out infinite`, animationDelay: `${delay}ms` }} />;
-}
-
-/* ── Animated checkmark (SVG stroke-dashoffset) ──────────────── */
-
-function AnimatedCheck({ size = 36 }: { size?: number }) {
-  const [k] = useState(() => Date.now());
-  return (
-    <svg key={k} width={size} height={size} viewBox="0 0 52 52" style={{ display: "block" }}>
-      <circle cx="26" cy="26" r="24" fill="none" stroke="#10B981" strokeWidth="2"
-        style={{ strokeDasharray: 151, strokeDashoffset: 151, animation: "int-acheck-circle 0.5s cubic-bezier(0.65,0,0.45,1) forwards" }} />
-      <path fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"
-        style={{ strokeDasharray: 36, strokeDashoffset: 36, animation: "int-acheck-check 0.3s cubic-bezier(0.65,0,0.45,1) 0.5s forwards" }} />
-    </svg>
-  );
-}
-
-function AnimatedCheckMuted({ size = 36 }: { size?: number }) {
-  const [k] = useState(() => Date.now());
-  return (
-    <svg key={k} width={size} height={size} viewBox="0 0 52 52" style={{ display: "block" }}>
-      <circle cx="26" cy="26" r="24" fill="none" stroke="#A8A29E" strokeWidth="2"
-        style={{ strokeDasharray: 151, strokeDashoffset: 151, animation: "int-acheck-circle 0.5s cubic-bezier(0.65,0,0.45,1) forwards" }} />
-      <path fill="none" stroke="#A8A29E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"
-        style={{ strokeDasharray: 36, strokeDashoffset: 36, animation: "int-acheck-check 0.3s cubic-bezier(0.65,0,0.45,1) 0.5s forwards" }} />
-    </svg>
-  );
-}
-
 /* ── Shared button styles ─────────────────────────────────────── */
 
 const primaryBtnStyle: React.CSSProperties = {
   height: 40, borderRadius: 8, border: "none", backgroundColor: ws.primary,
-  color: "#fff", fontSize: 13, fontWeight: 600, fontFamily: f, cursor: "pointer",
+  color: ws.onPrimary, fontSize: 13, fontWeight: 600, fontFamily: f, cursor: "pointer",
   transition: "background-color 0.15s",
+  boxShadow: ws.buttonInnerHighlight,
 };
 
 const primaryBtnSmStyle: React.CSSProperties = {
@@ -138,9 +58,9 @@ const dangerBtnStyle: React.CSSProperties = {
   ...primaryBtnStyle, backgroundColor: ws.error,
 };
 
-function hoverPrimary(e: React.MouseEvent<HTMLButtonElement>) { e.currentTarget.style.backgroundColor = "#6D28D9"; }
+function hoverPrimary(e: React.MouseEvent<HTMLButtonElement>) { e.currentTarget.style.backgroundColor = ws.primaryHover; }
 function leavePrimary(e: React.MouseEvent<HTMLButtonElement>) { e.currentTarget.style.backgroundColor = ws.primary; }
-function hoverDanger(e: React.MouseEvent<HTMLButtonElement>) { e.currentTarget.style.backgroundColor = "#BE123C"; }
+function hoverDanger(e: React.MouseEvent<HTMLButtonElement>) { e.currentTarget.style.backgroundColor = ws.errorHover; }
 function leaveDanger(e: React.MouseEvent<HTMLButtonElement>) { e.currentTarget.style.backgroundColor = ws.error; }
 function hoverText(e: React.MouseEvent<HTMLButtonElement>) { e.currentTarget.style.opacity = "0.7"; }
 function leaveText(e: React.MouseEvent<HTMLButtonElement>) { e.currentTarget.style.opacity = "1"; }
@@ -467,7 +387,7 @@ function DetailPanel({ item, onClose }: { item: IntegrationItem; onClose: () => 
         {item.tools.map((tool, ti) => (
           <div key={tool.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 12px", borderBottom: ti < item.tools.length - 1 ? `1px solid ${ws.divider}` : "none" }}>
             <span style={{ fontSize: 13, color: ws.muted_text, fontFamily: f }}>{tool.name}</span>
-            <div style={{ width: 36, height: 20, borderRadius: 10, backgroundColor: "#E7E5E4", position: "relative", opacity: 0.5 }}>
+            <div style={{ width: 36, height: 20, borderRadius: 10, backgroundColor: ws.toggleBg, position: "relative", opacity: 0.5 }}>
               <span style={{ position: "absolute", top: 2, left: 2, width: 16, height: 16, borderRadius: "50%", backgroundColor: ws.disabled }} />
             </div>
           </div>
@@ -532,7 +452,7 @@ function DetailPanel({ item, onClose }: { item: IntegrationItem; onClose: () => 
       {header}
       <div style={{ ...bodyFade, padding: "20px 20px" }}>
         <div style={{ width: 24, height: 24, marginBottom: 12 }}>
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" style={{ stroke: ws.primary }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
         </div>
         <div style={{ fontSize: 15, fontWeight: 600, color: ws.heading, fontFamily: f, marginBottom: 10 }}>Enable {item.name} for your organization?</div>
         <p style={{ fontSize: 13, lineHeight: 1.5, color: ws.secondary, fontFamily: f, margin: 0 }}>
@@ -617,7 +537,7 @@ function DetailPanel({ item, onClose }: { item: IntegrationItem; onClose: () => 
       {header}
       <div style={{ ...bodyFade, padding: "20px 20px" }}>
         <div style={{ width: 24, height: 24, marginBottom: 12 }}>
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" style={{ stroke: ws.warning }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
         </div>
         <div style={{ fontSize: 15, fontWeight: 600, color: ws.heading, fontFamily: f, marginBottom: 10 }}>Disconnect this account?</div>
         <p style={{ fontSize: 13, lineHeight: 1.5, color: ws.secondary, fontFamily: f, margin: 0 }}>
@@ -640,7 +560,7 @@ function DetailPanel({ item, onClose }: { item: IntegrationItem; onClose: () => 
       {header}
       <div style={{ ...bodyFade, padding: "20px 20px" }}>
         <div style={{ width: 24, height: 24, marginBottom: 12 }}>
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#E11D48" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" style={{ stroke: ws.error }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
         </div>
         <div style={{ fontSize: 15, fontWeight: 600, color: ws.heading, fontFamily: f, marginBottom: 10 }}>Disable {item.name} for your organization?</div>
         <p style={{ fontSize: 13, lineHeight: 1.5, color: ws.secondary, fontFamily: f, margin: 0 }}>
@@ -701,7 +621,7 @@ function DetailPanel({ item, onClose }: { item: IntegrationItem; onClose: () => 
         {item.accountEmail && (
           <div style={{ padding: "14px 20px", borderBottom: `1px solid ${ws.divider}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flex: 1 }}>
-              <div style={{ width: 24, height: 24, borderRadius: "50%", backgroundColor: ws.primary, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "#fff", fontFamily: f, flexShrink: 0 }}>{item.accountEmail.charAt(0).toUpperCase()}</div>
+              <div style={{ width: 24, height: 24, borderRadius: "50%", backgroundColor: ws.primary, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: ws.onPrimary, fontFamily: f, flexShrink: 0 }}>{item.accountEmail.charAt(0).toUpperCase()}</div>
               <span style={{ fontSize: 13, color: ws.body, fontFamily: f, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.accountEmail}</span>
             </div>
             <button onClick={() => setFlow("confirmDisconnect")} style={{ background: "none", border: `1px solid ${ws.border}`, borderRadius: 6, cursor: "pointer", flexShrink: 0, fontSize: 11, fontWeight: 500, color: ws.secondary, fontFamily: f, whiteSpace: "nowrap", padding: "4px 10px", transition: "border-color 0.15s, color 0.15s" }}
@@ -715,8 +635,8 @@ function DetailPanel({ item, onClose }: { item: IntegrationItem; onClose: () => 
       </div>
       {/* Footer */}
       <div style={{ padding: "12px 20px 16px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <button onClick={() => setFlow("confirmDisable")} style={{ background: "none", border: "1px solid #FECACA", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 500, color: ws.error, fontFamily: f, whiteSpace: "nowrap", padding: "6px 14px", display: "inline-flex", alignItems: "center", justifyContent: "center", transition: "background-color 0.15s" }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#FEF2F2"; }}
+        <button onClick={() => setFlow("confirmDisable")} style={{ background: "none", border: `1px solid ${ws.errorBorder}`, borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 500, color: ws.error, fontFamily: f, whiteSpace: "nowrap", padding: "6px 14px", display: "inline-flex", alignItems: "center", justifyContent: "center", transition: "background-color 0.15s" }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = ws.errorHoverBg; }}
           onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
         >Disable for Org</button>
       </div>
@@ -853,18 +773,7 @@ export default function AppsTab() {
     const Logo = integrationLogoMap[item.id];
     const isSelected = item.id === selectedId;
     return (
-      <div key={item.id} role="button" tabIndex={0} aria-selected={isSelected}
-        onClick={() => handleSelectItem(item.id)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSelectItem(item.id); } }}
-        style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: isMobile ? "14px 14px" : "10px 14px", cursor: "pointer", transition: "background-color 0.15s",
-          borderBottom: last ? "none" : `1px solid ${ws.divider}`,
-          backgroundColor: isSelected ? ws.elevated : "transparent",
-        }}
-        onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = ws.hoverBg; }}
-        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = isSelected ? ws.elevated : "transparent"; }}
-      >
+      <ListRow key={item.id} onClick={() => handleSelectItem(item.id)} selected={isSelected} last={last} padding={isMobile ? "14px 14px" : "10px 14px"}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
           <div style={{ flexShrink: 0 }}>{Logo ? <Logo size={20} /> : <ColorCircle color={item.color} />}</div>
           <span style={{ fontSize: isMobile ? 14 : 13, fontWeight: 500, color: ws.body, fontFamily: f, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.name}</span>
@@ -875,7 +784,7 @@ export default function AppsTab() {
           {!item.enabled && <span style={{ fontSize: isMobile ? 13 : 12, color: ws.muted_text, fontFamily: f, whiteSpace: "nowrap" }}>{item.description}</span>}
           <ChevronRight size={14} color={ws.disabled} />
         </div>
-      </div>
+      </ListRow>
     );
   }
 
@@ -892,9 +801,13 @@ export default function AppsTab() {
 
       <div style={{ fontFamily: f }}>
         <h1 style={{ fontSize: isMobile ? 24 : 20, fontWeight: 700, color: ws.heading, margin: 0, fontFamily: f }}>Apps</h1>
-        <p style={{ fontSize: isMobile ? 14 : 13, color: ws.secondary, margin: "4px 0 14px", fontFamily: f }}>
+        <p style={{ fontSize: isMobile ? 14 : 13, color: ws.secondary, margin: "4px 0 0", fontFamily: f }}>
           Connect apps and services to power your Workers. {connectedCount} connected
         </p>
+
+        <div style={{ margin: "14px 0" }}>
+          <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Search apps and services..." variant="prominent" />
+        </div>
 
         {/* Content area */}
         <div style={{ display: "flex" }}>
@@ -906,25 +819,9 @@ export default function AppsTab() {
           }}>
             {/* Filter chips */}
             <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 16 }}>
-              {categories.map((cat) => {
-                const isActive = activeCategory === cat.id;
-                return (
-                  <button key={cat.id} onClick={() => { setActiveCategory(cat.id); setSearchQuery(""); }}
-                    style={{
-                      height: isMobile ? 32 : 26, borderRadius: 8, padding: isMobile ? "0 12px" : "0 10px", fontSize: isMobile ? 12 : 11, fontFamily: f,
-                      fontWeight: isActive ? 500 : "normal",
-                      cursor: "pointer", transition: "background-color 0.15s, color 0.15s, border-color 0.15s",
-                      border: isActive ? "1px solid transparent" : `1px solid ${ws.border}`,
-                      backgroundColor: isActive ? ws.primaryLight : "transparent",
-                      color: isActive ? ws.primary : ws.secondary,
-                    }}
-                    onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = "#F5F0EB"; }}
-                    onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.backgroundColor = isActive ? ws.primaryLight : "transparent"; }}
-                  >
-                    {cat.label}
-                  </button>
-                );
-              })}
+              {categories.map((cat) => (
+                <FilterChip key={cat.id} label={cat.label} active={activeCategory === cat.id} onClick={() => { setActiveCategory(cat.id); setSearchQuery(""); }} isMobile={isMobile} />
+              ))}
             </div>
 
             {/* List content */}
@@ -974,69 +871,9 @@ export default function AppsTab() {
         </div>
       </div>
 
-      {/* Backdrop overlay — non-desktop */}
-      {!isDesktop && (
-        <div
-          onClick={handleClosePanel}
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.25)",
-            opacity: panelOpen ? 1 : 0,
-            pointerEvents: panelOpen ? "auto" : "none",
-            transition: `opacity 0.24s ${spring}`,
-            zIndex: 9,
-          }}
-        />
-      )}
-
-      {/* Panel — side panel (desktop/tablet) or bottom sheet (mobile) */}
-      <div data-int-panel style={isMobile ? {
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: "85vh",
-        transform: panelOpen ? "translateY(0)" : "translateY(100%)",
-        opacity: panelOpen ? 1 : 0,
-        transition: `transform 0.32s ${spring}, opacity 0.2s ${spring}`,
-        pointerEvents: panelOpen ? "auto" : "none",
-        zIndex: 10,
-      } : {
-        position: "fixed",
-        top: 80,
-        right: isDesktop ? 32 : 20,
-        width: isDesktop ? 480 : "min(480px, calc(100vw - 260px))",
-        height: "calc(100vh - 100px)",
-        transform: panelOpen ? "translateX(0)" : "translateX(calc(100% + 40px))",
-        opacity: panelOpen ? 1 : 0,
-        transition: `transform 0.32s ${spring}, opacity 0.24s ${spring}`,
-        pointerEvents: panelOpen ? "auto" : "none",
-        zIndex: 10,
-      }}>
-        <div style={{
-          width: "100%", height: "100%",
-          borderRadius: isMobile ? "20px 20px 0 0" : 14,
-          backgroundColor: ws.surface,
-          border: isMobile ? "none" : `1px solid ${ws.border}`,
-          boxShadow: isMobile
-            ? "0 -4px 20px rgba(0,0,0,0.08)"
-            : "0 4px 16px -4px rgba(0,0,0,0.08), 0 1px 4px -1px rgba(0,0,0,0.04)",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-        }}>
-          {/* Drag handle — mobile only */}
-          {isMobile && (
-            <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 2px", flexShrink: 0 }}>
-              <div style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: ws.disabled }} />
-            </div>
-          )}
-          <div style={{ flex: 1, minHeight: 0, overflow: "hidden", opacity: panelFading ? 0 : 1, transition: "opacity 0.2s ease" }}>
-            {renderedItem && <DetailPanel item={renderedItem} onClose={handleClosePanel} />}
-          </div>
-        </div>
-      </div>
+      <DetailPanelShell open={panelOpen} onClose={handleClosePanel} isMobile={isMobile} isDesktop={isDesktop} dataAttr="int-panel" fading={panelFading}>
+        {renderedItem && <DetailPanel item={renderedItem} onClose={handleClosePanel} />}
+      </DetailPanelShell>
     </>
   );
 }

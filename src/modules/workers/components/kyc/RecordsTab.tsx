@@ -1,17 +1,8 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ws as baseWs, f } from "@/shared/utils/contentTokens";
 
-const f = "Inter, sans-serif";
-
-const ws = {
-  page: "#FAF8F5", surface: "#FFFDF9", sidebar: "#F5F0EB", muted: "#F0EBE4",
-  elevated: "#F5F0EB", border: "#E7E0D8", divider: "#F0EBE4", inputBorder: "#D6D3D1",
-  heading: "#292524", body: "#44403C", secondary: "#78716C", muted_text: "#A8A29E",
-  disabled: "#D6D3D1", primary: "#7C3AED", primaryHover: "#6D28D9", primaryLight: "#EDE9FE",
-  primaryDark: "#5B21B6", success: "#10B981", successFg: "#065F46", successBg: "#ECFDF5",
-  warning: "#F59E0B", warningFg: "#92400E", warningBg: "#FFFBEB", error: "#E11D48",
-  errorFg: "#9F1239", errorBg: "#FFF1F2", hoverBg: "#EDE8E3",
-};
+const ws = { ...baseWs, sidebar: baseWs.sidebarZone };
 
 type Status = "Review" | "ERP Posting" | "Complete" | "Failed";
 type Filter = "All" | "Complete" | "Active" | "Failed";
@@ -266,7 +257,7 @@ export default function RecordsTab() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            backgroundColor: "#F5F0EB",
+            backgroundColor: ws.sidebarZone,
             padding: "12px 16px",
             borderBottom: `1px solid ${ws.border}`,
           }}

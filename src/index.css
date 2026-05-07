@@ -4,26 +4,114 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Content-zone design tokens — Cool Zinc + Bright Blue (Option D) ──────── */
+:root {
+  --ws-page: #FAFAFA;
+  --ws-surface: #FFFFFF;
+  --ws-elevated: #F4F4F5;
+  --ws-muted: #F4F4F5;
+  --ws-hover-bg: #F4F4F5;
+  --ws-border: #E4E4E7;
+  --ws-divider: #F4F4F5;
+  --ws-input-border: #D4D4D8;
+  --ws-heading: #000000;
+  --ws-body: #18181B;
+  --ws-secondary: #52525B;
+  --ws-muted-text: #71717A;
+  --ws-disabled: #A1A1AA;
+  --ws-primary: #0070F3;
+  --ws-primary-hover: #0761D1;
+  --ws-primary-dark: #0550AE;
+  --ws-primary-light: #DBEAFE;
+  --ws-success: #00A65A;
+  --ws-success-bg: #E6F7EE;
+  --ws-success-fg: #0A6E40;
+  --ws-warning: #F5A623;
+  --ws-warning-bg: #FFF6E5;
+  --ws-warning-fg: #8A5A00;
+  --ws-error: #EE0000;
+  --ws-error-bg: #FFEBEB;
+  --ws-error-fg: #B30000;
+  --ws-error-border: #FFB3B3;
+  --ws-error-hover: #C40000;
+  --ws-error-hover-bg: #FFF0F0;
+  --ws-error-text-hover: #C40000;
+  --ws-toggle-bg: #E4E4E7;
+  --ws-on-primary: #FFFFFF;
+
+  /* Sidebar — cool zinc */
+  --ws-sidebar-bg: #EBEBEC;
+  --ws-sidebar-zone: #F4F4F5;
+  --ws-sidebar-divider: #E4E4E7;
+  --ws-sidebar-body: #3F3F46;
+  --ws-sidebar-icon-rest: #71717A;
+  --ws-sidebar-icon-hover: #52525B;
+  --ws-sidebar-kb-hint: #A1A1AA;
+  --ws-sidebar-active-bg: #DBEAFE;
+  --ws-sidebar-active-hover-bg: #BFDBFE;
+  --ws-sidebar-hover-bg: #DCDCDF;
+  --ws-sidebar-focus-ring: #93C5FD;
+  --ws-sidebar-scrollbar: #D4D4D8;
+  --ws-sidebar-scrollbar-hover: #A1A1AA;
+  --ws-sidebar-section-label: #A1A1AA;
+  --ws-sidebar-icon-btn-hover: #D4D4D8;
+
+  /* Active nav row — defaults route to existing primary/primary-dark values */
+  --ws-sidebar-active-text: var(--ws-primary-dark);
+  --ws-sidebar-active-icon: var(--ws-primary);
+
+  /* Sidebar brand text and tooltip — default to page-context values */
+  --ws-sidebar-brand-text: var(--ws-heading);
+  --ws-sidebar-tooltip-bg: var(--ws-heading);
+  --ws-sidebar-tooltip-text: var(--ws-on-primary);
+
+  /* Active pill — sidebar compound active state */
+  --ws-active-pill-bg: #E5EDFB;
+  --ws-active-pill-hover: #D8E8F9;
+
+  /* Motion duration tokens */
+  --dur-fast: 100ms;
+  --dur-mid: 150ms;
+  --dur-slow: 200ms;
+
+  /* Brand logo */
+  --ws-brand-logo: #0070F3;
+
+  /* Effect tokens — Option D shadows (pure black) */
+  --ws-button-inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 2px rgba(0, 0, 0, 0.12);
+  --ws-card-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+  --ws-card-border: 1px solid transparent;
+  --ws-sidebar-edge: 1px solid transparent;
+  --ws-search-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+  --ws-search-border: 1px solid transparent;
+  --ws-focus-ring: 0 0 0 3px var(--ws-primary-light);
+
+  /* Canvas (Option B floating) — uses same 3-layer compound as cards */
+  --ws-canvas-radius: 12px 12px 0 0;
+  --ws-canvas-shadow: var(--ws-card-shadow);
+  --ws-canvas-margin: 8px 8px 0 0;
+}
+
 @layer base {
   :root {
-    /* Warm Stone + Deep Violet */
-    --bg: 250 248 245;           /* #FAF8F5 warm page bg */
-    --fg: 41 37 36;              /* #292524 warm heading */
-    --muted: 120 113 108;        /* #78716C warm secondary */
-    --primary: 124 58 237;       /* #7C3AED deep violet */
-    --ring: 124 58 237;          /* #7C3AED */
-    --danger: 225 29 72;         /* #E11D48 rose-red */
-    --warning: 245 158 11;       /* #F59E0B amber */
-    --success: 16 185 129;       /* #10B981 emerald */
-    --border: 231 224 216;       /* #E7E0D8 warm border */
-    --card: 255 253 249;         /* #FFFDF9 warm surface */
-    --card-fg: 41 37 36;         /* #292524 */
-    --input: 214 211 209;        /* #D6D3D1 warm input border */
-    --accent: 240 235 228;       /* #F0EBE4 warm divider */
-    --accent-fg: 41 37 36;       /* #292524 */
-    --sidebar: 245 240 235;      /* #F5F0EB warm sidebar */
-    --sidebar-fg: 41 37 36;      /* #292524 */
-    --sidebar-accent: 237 233 254; /* #EDE9FE violet light */
+    /* Cool Zinc + Bright Blue — Tailwind RGB triples */
+    --bg: 250 250 250;           /* #FAFAFA cool page bg */
+    --fg: 24 24 27;              /* #18181B dark zinc body */
+    --muted: 82 82 91;           /* #52525B cool secondary */
+    --primary: 0 112 243;        /* #0070F3 bright blue */
+    --ring: 0 112 243;           /* #0070F3 */
+    --danger: 238 0 0;           /* #EE0000 */
+    --warning: 245 166 35;       /* #F5A623 */
+    --success: 0 166 90;         /* #00A65A */
+    --border: 228 228 231;       /* #E4E4E7 cool border */
+    --card: 255 255 255;         /* #FFFFFF surface */
+    --card-fg: 24 24 27;         /* #18181B */
+    --input: 212 212 216;        /* #D4D4D8 cool input border */
+    --accent: 244 244 245;       /* #F4F4F5 cool divider */
+    --accent-fg: 24 24 27;       /* #18181B */
+    --sidebar: 235 235 236;      /* #EBEBEC cool sidebar */
+    --sidebar-fg: 24 24 27;      /* #18181B */
+    --sidebar-accent: 219 234 254; /* #DBEAFE blue tint */
     --radius-md: 8px;
     --radius-lg: 14px;
     --radius-xl: 16px;
@@ -77,13 +165,41 @@
 }
 
 @keyframes gf-toggle-glow {
-  0% { box-shadow: 0 0 0 0 rgba(124,58,237,0.4); }
-  50% { box-shadow: 0 0 0 4px rgba(124,58,237,0.15); }
-  100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+  0% { box-shadow: 0 0 0 0 rgba(0,112,243,0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(0,112,243,0.15); }
+  100% { box-shadow: 0 0 0 0 rgba(0,112,243,0); }
 }
 
 @keyframes gf-acheck-circle { 100% { stroke-dashoffset: 0; } }
 @keyframes gf-acheck-check { 100% { stroke-dashoffset: 0; } }
+
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+.badge-idle-pulse {
+  animation: badge-pulse 1s ease-in-out 8s infinite;
+}
+
+/* Sidebar tooltip Y-slide (micro-interaction #5) */
+.sidebar-tooltip {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--dur-fast) ease-out 300ms, transform var(--dur-fast) ease-out 300ms;
+  pointer-events: none;
+}
+.sidebar-tooltip[data-show="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-mid: 0ms;
+    --dur-slow: 0ms;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -120,4 +236,13 @@
   clip: auto;
   white-space: normal;
   @apply rounded-lg bg-primary text-primary-foreground;
+}
+
+/* Option B floating canvas — mobile collapse */
+@media (max-width: 767px) {
+  .canvas-shell {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
 }

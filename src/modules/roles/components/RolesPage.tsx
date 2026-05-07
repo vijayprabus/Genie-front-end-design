@@ -8,21 +8,24 @@ import {
   Smartphone,
   Box,
 } from "lucide-react";
+import { ws as baseWs, f } from "@/shared/utils/contentTokens";
+import { Card } from "@/shared/components/settings";
 
 // ---------------------------------------------------------------------------
-// Warm Stone palette
+// Warm Stone palette (extended with RolesPage-specific tokens)
 // ---------------------------------------------------------------------------
 const ws = {
-  page: "#FAF8F5", surface: "#FFFDF9", border: "#E7E0D8", divider: "#F0EBE4",
-  heading: "#292524", body: "#44403C", secondary: "#78716C", muted: "#A8A29E",
-  disabled: "#D6D3D1", successBg: "#ECFDF5", successFg: "#065F46",
-  warningBg: "#FFFBEB", warningFg: "#B36800", amber: "#F0B429",
-  hoverBg: "#EDE8E3", chipBg: "#FAFAFA", chipBorder: "#E8E8E8",
-  catBg: "#F0EBE4", catText: "#78716C", newBg: "#FFF3E0", newText: "#E65100",
-  statBg: "#F8F8F8", statBorder: "#EEE",
+  ...baseWs,
+  amber: "#F0B429",
+  chipBg: "#FAFAFA",
+  chipBorder: "#E8E8E8",
+  catBg: "#F0EBE4",
+  catText: "#78716C",
+  newBg: "#FFF3E0",
+  newText: "#E65100",
+  statBg: "#F8F8F8",
+  statBorder: "#EEE",
 };
-
-const f = "Inter, sans-serif";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -568,9 +571,10 @@ export default function RolesPage() {
         )}
 
         {/* Bottom utility strip */}
+        <div style={{ marginTop: 8 }}>
+        <Card>
         <div style={{
-          borderTop: `2px solid ${ws.border}`, backgroundColor: ws.surface,
-          padding: "20px 28px", borderRadius: 10, marginTop: 8,
+          padding: "20px 28px",
           display: "grid", gridTemplateColumns: "1fr 1px 1fr", gap: 28,
         }}>
           <div>
@@ -599,6 +603,8 @@ export default function RolesPage() {
               </a>
             </p>
           </div>
+        </div>
+        </Card>
         </div>
 
       </div>

@@ -3,6 +3,7 @@ import { Outlet, useOutletContext, useLocation, NavLink } from "react-router-dom
 import { Bell, Menu, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { useBreakpoint } from "@/shared/hooks/useBreakpoint";
+import { ws, f } from "@/shared/utils/contentTokens";
 
 export interface LayoutContext {
   showHamburger?: boolean;
@@ -16,37 +17,22 @@ export function useLayoutContext(): LayoutContext {
   return useOutletContext<LayoutContext>() || { searchQuery: "", setSearchQuery: () => {} };
 }
 
-const f = "Inter, sans-serif";
-
-const ws = {
-  page: "#FAF8F5",
-  surface: "#FFFDF9",
-  body: "#44403C",
-  secondary: "#78716C",
-  muted_text: "#A8A29E",
-  disabled: "#D6D3D1",
-  border: "#E7E0D8",
-  muted: "#F0EBE4",
-  hoverBg: "#EDE8E3",
-  error: "#E11D48",
-  primary: "#7C3AED",
-};
-
 /** Map route segment to breadcrumb info */
 function useBreadcrumb() {
   const { pathname } = useLocation();
   const segment = pathname.split("/")[2] || "general";
 
-  const integrationPages = ["apps", "data", "models"];
+  const integrationPages = ["apps", "apps-a", "apps-b", "apps-c", "apps-d", "apps-e1", "apps-e2", "data", "models"];
   const isIntegration = integrationPages.includes(segment);
 
   const labelMap: Record<string, string> = {
-    general: "General", members: "Members", teams: "Teams",
+    general: "General", members: "Users", teams: "Teams",
     notifications: "Notifications", billing: "Plans & Usage",
     api: "API Keys", models: "Models", integrations: "Integrations",
-    apps: "Apps", data: "Data",
+    apps: "Apps", "apps-a": "Apps (Option A — Blue-Tinted)", "apps-b": "Apps (Option B)", "apps-c": "Apps (Option C)", "apps-d": "Apps (Option D — Cool Zinc)", "apps-e1": "Apps (E1 — Tinted Sidebar)", "apps-e2": "Apps (E2 — Dark Sidebar)", data: "Data",
     "integrations-v2": "Integrations V2", "integrations-v3": "Integrations V3",
     "integrations-v4": "Integrations V4", "integrations-v5": "Integrations V5",
+    "users-a": "Users (Option A — Blue-Tinted)", "users-d": "Users (Option D — Cool Zinc)", "users-e1": "Users (E1 — Tinted Sidebar)", "users-e2": "Users (E2 — Dark Sidebar)",
   };
 
   return {
@@ -62,9 +48,19 @@ function useSearchPlaceholder() {
   const segment = pathname.split("/")[2] || "general";
   const map: Record<string, string> = {
     apps: "Search integrations...",
+    "apps-a": "Search integrations...",
+    "apps-b": "Search integrations...",
+    "apps-c": "Search integrations...",
+    "apps-d": "Search integrations...",
+    "apps-e1": "Search integrations...",
+    "apps-e2": "Search integrations...",
     data: "Search data sources...",
     models: "Search providers...",
     members: "Search members...",
+    "users-a": "Search members...",
+    "users-d": "Search members...",
+    "users-e1": "Search members...",
+    "users-e2": "Search members...",
     teams: "Search teams...",
     integrations: "Search integrations...",
   };

@@ -10,7 +10,7 @@ export default function LoginPage() {
     <AuthLayout title="Welcome back" subtitle="Sign in to your Genie Forge account">
       <Card>
         <CardContent className="pt-6">
-          <LoginForm onSuccess={() => navigate("/chat")} />
+          <LoginForm onSuccess={() => navigate("/home")} />
           <div className="mt-4 text-center text-sm text-muted-foreground">
             <Link
               to="/forgot-password"

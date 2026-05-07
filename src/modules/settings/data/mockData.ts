@@ -101,6 +101,17 @@ export const mockMembers: Member[] = [
     status: 'Pending',
     joinedAt: '2025-03-10',
   },
+  {
+    id: 'm10',
+    name: 'Meera Kapoor',
+    email: 'meera.kapoor@marico.com',
+    initials: 'MK',
+    avatarColor: '#78716C',
+    role: 'Member',
+    teams: [],
+    status: 'Deactivated',
+    joinedAt: '2024-01-10',
+  },
 ];
 
 // ── Teams ────────────────────────────────────────────────────────────

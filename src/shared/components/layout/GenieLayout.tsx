@@ -4,13 +4,7 @@ import { Menu, Bell } from "lucide-react";
 import { toast } from "sonner";
 import SettingsSidebar from "@/modules/settings/components/SettingsSidebar";
 import { useBreakpoint } from "@/shared/hooks/useBreakpoint";
-
-const ws = {
-  page: "#FAF8F5",
-  primary: "#7C3AED",
-};
-
-const spring = "cubic-bezier(0.22, 1, 0.36, 1)";
+import { ws, spring } from "@/shared/utils/contentTokens";
 
 /** Subtle inline loader */
 function ContentLoader() {
@@ -59,6 +53,7 @@ export default function GenieLayout() {
         height: "100vh",
         overflow: "hidden",
         fontFamily: "Inter, sans-serif",
+        backgroundColor: ws.sidebarBg,
       }}
     >
       {/* Desktop: sidebar always visible in flow */}
@@ -97,8 +92,9 @@ export default function GenieLayout() {
         </>
       )}
 
-      {/* Content area — no topbar, content fills the space */}
+      {/* Content area — floating canvas (Option B) */}
       <div
+        className="canvas-shell"
         data-genie-content
         data-sidebar-toggle={!isDesktop ? "true" : undefined}
         data-sidebar-open={sidebarOpen ? "true" : undefined}
@@ -106,8 +102,13 @@ export default function GenieLayout() {
           flex: 1,
           display: "flex",
           flexDirection: "column",
-          overflow: "hidden",
-          backgroundColor: ws.page,
+          overflowY: "auto",
+          overflowX: "hidden",
+          backgroundColor: ws.surface,
+          margin: isDesktop ? "8px 8px 0 0" : "0",
+          borderRadius: isDesktop ? "12px 12px 0 0" : "0",
+          boxShadow: isDesktop ? ws.cardShadow : "none",
+          minHeight: 0,
         }}
       >
         {/* Minimal nav for non-settings pages */}
@@ -128,7 +129,7 @@ export default function GenieLayout() {
                 justifyContent: "center", borderRadius: 6, outline: "none",
               }}
             >
-              <Menu size={18} color="#44403C" />
+              <Menu size={18} color={ws.body} />
             </button>
             <button
               onClick={() => toast("Notifications coming soon")}
@@ -139,11 +140,11 @@ export default function GenieLayout() {
                 position: "relative", opacity: 0.6,
               }}
             >
-              <Bell size={16} color="#A8A29E" />
+              <Bell size={16} color={ws.muted_text} />
               <span style={{
                 position: "absolute", top: 0, right: -1,
                 width: 14, height: 14, borderRadius: "50%",
-                backgroundColor: "#E11D48", display: "flex",
+                backgroundColor: ws.error, display: "flex",
                 alignItems: "center", justifyContent: "center",
                 fontSize: 8, fontWeight: 700, color: "white",
               }}>3</span>

@@ -1,20 +1,6 @@
 import { create } from "zustand";
 import { MOCK_CHAT_SESSIONS, MOCK_MESSAGES } from "@/shared/utils/devMocks.ts";
-
-interface ChatSession {
-  id: string;
-  title: string;
-  lastMessage: string;
-  updatedAt: string;
-}
-
-interface ChatMessage {
-  id: string;
-  chatId: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: string;
-}
+import type { ChatMessage, ChatSession } from "@/modules/chat/types";
 
 interface ChatState {
   sessions: ChatSession[];

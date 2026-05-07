@@ -36,7 +36,7 @@ export default function SignupPage() {
   const onSubmit = async (data: SignupFormData) => {
     clearError();
     const success = await signup(data.name, data.email, data.password);
-    if (success) navigate("/chat");
+    if (success) navigate("/home");
   };
 
   return (

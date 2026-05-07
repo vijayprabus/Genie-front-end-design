@@ -1,6 +1,4 @@
-import { cn } from "@/shared/utils/cn.ts";
-import { Avatar, AvatarFallback } from "@/shared/components/ui/avatar.tsx";
-import { BlockRenderer } from "./BlockRenderer.tsx";
+import { ws, f } from "@/shared/utils/contentTokens";
 
 interface MessageBubbleProps {
   role: "user" | "assistant";
@@ -11,26 +9,25 @@ export function MessageBubble({ role, content }: MessageBubbleProps) {
   const isUser = role === "user";
 
   return (
-    <div
-      className={cn(
-        "flex gap-3",
-        isUser && "flex-row-reverse",
-      )}
-    >
-      <Avatar className="h-8 w-8 shrink-0">
-        <AvatarFallback className={cn(isUser ? "bg-primary text-primary-foreground" : "bg-accent")}>
-          {isUser ? "U" : "G"}
-        </AvatarFallback>
-      </Avatar>
-      <div
-        className={cn(
-          "max-w-[80%] rounded-xl px-4 py-3",
-          isUser
-            ? "bg-primary text-primary-foreground"
-            : "bg-accent text-accent-foreground",
-        )}
-      >
-        <BlockRenderer content={content} />
+    <div style={{
+      display: "flex",
+      justifyContent: isUser ? "flex-end" : "flex-start",
+      padding: "8px 0",
+    }}>
+      <div style={{
+        maxWidth: isUser ? 440 : "100%",
+        padding: isUser ? "10px 16px" : "14px 18px",
+        borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+        backgroundColor: isUser ? ws.elevated : ws.surface,
+        border: isUser ? "none" : `1px solid ${ws.divider}`,
+      }}>
+        <p style={{
+          margin: 0, fontSize: 14, fontWeight: 400,
+          color: ws.body, fontFamily: f, lineHeight: 1.6,
+          whiteSpace: "pre-wrap",
+        }}>
+          {content}
+        </p>
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ const MarketplaceAgents = lazy(() => import("@/modules/marketplace/pages/Marketp
 const GenieLayout = lazy(() => import("@/shared/components/layout/GenieLayout"));
 const SettingsLayout = lazy(() => import("@/modules/settings/components/SettingsLayout"));
 const GeneralTab = lazy(() => import("@/modules/settings/components/general/GeneralTab"));
-const MembersTab = lazy(() => import("@/modules/settings/components/members/MembersTab"));
+const UsersTab = lazy(() => import("@/modules/settings/components/users/UsersTab"));
 const TeamsTab = lazy(() => import("@/modules/settings/components/teams/TeamsTab"));
 const NotificationsTab = lazy(() => import("@/modules/settings/components/notifications/NotificationsTab"));
 const BillingTab = lazy(() => import("@/modules/settings/components/billing/BillingTab"));
@@ -110,7 +110,7 @@ function AppRoutes() {
         <Route path="/settings" element={<SettingsLayout />}>
           <Route index element={<Navigate to="general" replace />} />
           <Route path="general" element={<GeneralTab />} />
-          <Route path="members" element={<MembersTab />} />
+          <Route path="users" element={<UsersTab />} />
           <Route path="teams" element={<TeamsTab />} />
           <Route path="notifications" element={<NotificationsTab />} />
           <Route path="billing" element={<BillingTab />} />

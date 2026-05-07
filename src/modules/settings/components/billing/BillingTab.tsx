@@ -1,14 +1,7 @@
-const f = "Inter, sans-serif";
+import { ws as baseWs, f } from "@/shared/utils/contentTokens";
+import { Card } from "@/shared/components/settings";
 
-const ws = {
-  page: "#FAF8F5", surface: "#FFFDF9", sidebar: "#F5F0EB", muted: "#F0EBE4",
-  elevated: "#F5F0EB", border: "#E7E0D8", divider: "#F0EBE4", inputBorder: "#D6D3D1",
-  heading: "#292524", body: "#44403C", secondary: "#78716C", muted_text: "#A8A29E",
-  disabled: "#D6D3D1", primary: "#7C3AED", primaryHover: "#6D28D9", primaryLight: "#EDE9FE",
-  primaryDark: "#5B21B6", success: "#10B981", successFg: "#065F46", successBg: "#ECFDF5",
-  warning: "#F59E0B", warningFg: "#92400E", warningBg: "#FFFBEB", error: "#E11D48",
-  errorFg: "#9F1239", errorBg: "#FFF1F2", hoverBg: "#EDE8E3",
-};
+const ws = { ...baseWs, sidebar: baseWs.sidebarZone };
 
 const stats = [
   { value: "8,412", label: "TASKS THIS MONTH", sub: "Mar 1 – 16, 2026" },
@@ -38,21 +31,19 @@ export default function BillingTab() {
       {/* Stats bar */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
         {stats.map((stat) => (
-          <div
-            key={stat.label}
-            style={{
-              backgroundColor: ws.surface, border: `1px solid ${ws.border}`,
-              borderRadius: 12, padding: 16,
-            }}
-          >
-            <p style={{ fontSize: 24, fontWeight: 700, color: ws.heading, margin: 0 }}>{stat.value}</p>
-            <p style={{
-              fontSize: 10, fontWeight: 500, textTransform: "uppercase" as const,
-              letterSpacing: 0.4, color: ws.muted_text, margin: 0, marginTop: 4,
-            }}>
-              {stat.label}
-            </p>
-            <p style={{ fontSize: 11, fontWeight: 400, color: ws.disabled, margin: 0, marginTop: 2 }}>{stat.sub}</p>
+          <div key={stat.label}>
+            <Card>
+              <div style={{ padding: 16 }}>
+                <p style={{ fontSize: 24, fontWeight: 700, color: ws.heading, margin: 0 }}>{stat.value}</p>
+                <p style={{
+                  fontSize: 10, fontWeight: 500, textTransform: "uppercase" as const,
+                  letterSpacing: 0.4, color: ws.muted_text, margin: 0, marginTop: 4,
+                }}>
+                  {stat.label}
+                </p>
+                <p style={{ fontSize: 11, fontWeight: 400, color: ws.disabled, margin: 0, marginTop: 2 }}>{stat.sub}</p>
+              </div>
+            </Card>
           </div>
         ))}
       </div>
@@ -66,7 +57,7 @@ export default function BillingTab() {
         }}>
           Usage by Worker
         </h2>
-        <div style={{ borderRadius: 12, border: `1px solid ${ws.border}`, backgroundColor: ws.surface, overflow: "hidden" }}>
+        <Card>
           {/* Table header */}
           <div style={{
             display: "flex", alignItems: "center", padding: "10px 16px",
@@ -94,7 +85,7 @@ export default function BillingTab() {
               <div style={{ width: 120, fontSize: 13, fontWeight: 400, color: ws.secondary }}>{row.effort}</div>
             </div>
           ))}
-        </div>
+        </Card>
       </div>
 
       {/* Plan & Billing */}
@@ -106,7 +97,7 @@ export default function BillingTab() {
         }}>
           Plan & Billing
         </h2>
-        <div style={{ borderRadius: 12, border: `1px solid ${ws.border}`, backgroundColor: ws.surface, overflow: "hidden" }}>
+        <Card>
           <div style={{
             display: "flex", alignItems: "center", justifyContent: "space-between",
             padding: "12px 16px", borderBottom: `1px solid ${ws.divider}`,
@@ -141,7 +132,7 @@ export default function BillingTab() {
               Contact Javis &rarr;
             </button>
           </div>
-        </div>
+        </Card>
       </div>
     </section>
   );

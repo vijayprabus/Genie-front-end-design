@@ -158,6 +158,26 @@ export function GroqLogo({ size = 20 }: { size?: number }) {
   );
 }
 
+export function CerebrasLogo({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <rect width="24" height="24" rx="4" fill="#F97316" />
+      <text
+        x="12"
+        y="12"
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill="#FFFFFF"
+        fontSize="16"
+        fontWeight="700"
+        fontFamily="Inter, sans-serif"
+      >
+        C
+      </text>
+    </svg>
+  );
+}
+
 export function HuggingFaceLogo({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -183,4 +203,5 @@ export const providerLogoMap: Record<string, React.FC<{ size?: number }>> = {
   xai: XAILogo,
   groq: GroqLogo,
   huggingface: HuggingFaceLogo,
+  cerebras: CerebrasLogo,
 };

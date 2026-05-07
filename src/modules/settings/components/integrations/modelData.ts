@@ -37,7 +37,7 @@ export interface ModelProviderItem {
   maskedKey?: string;
   paused?: boolean;
   panelMode: ModelPanelMode;
-  providerType: "simple" | "bedrock" | "azure" | "huggingface" | "selfhosted" | "genie";
+  providerType: "simple" | "bedrock" | "azure" | "huggingface" | "selfhosted" | "genie" | "catalog" | "hosting";
 }
 
 // ---- 1. Genie Managed (Default section) -----------------------------------
@@ -71,7 +71,25 @@ export const configuredProviders: ModelProviderItem[] = [
     paused: true,
     maskedKey: "az-••••1234",
     panelMode: "edit-provider",
-    providerType: "azure",
+    providerType: "hosting",
+  },
+  {
+    id: "groq",
+    name: "Groq",
+    description: "Ultra-fast inference",
+    configured: true,
+    maskedKey: "gsk-••••a3f1",
+    panelMode: "edit-provider",
+    providerType: "catalog",
+  },
+  {
+    id: "bedrock",
+    name: "Amazon Bedrock",
+    description: "AWS-hosted foundation models",
+    configured: true,
+    maskedKey: "AKIA••••WXYZ",
+    panelMode: "edit-provider",
+    providerType: "bedrock",
   },
 ];
 
@@ -118,14 +136,6 @@ export const availableProviders: ModelProviderItem[] = [
     providerType: "simple",
   },
   {
-    id: "bedrock",
-    name: "Amazon Bedrock",
-    description: "AWS-hosted foundation models",
-    configured: false,
-    panelMode: "add-provider",
-    providerType: "bedrock",
-  },
-  {
     id: "cohere",
     name: "Cohere",
     description: "Enterprise language models",
@@ -158,12 +168,12 @@ export const availableProviders: ModelProviderItem[] = [
     providerType: "simple",
   },
   {
-    id: "groq",
-    name: "Groq",
-    description: "Ultra-fast inference",
+    id: "cerebras",
+    name: "Cerebras",
+    description: "Ultra-fast wafer-scale inference",
     configured: false,
     panelMode: "add-provider",
-    providerType: "simple",
+    providerType: "catalog",
   },
   {
     id: "xai",
@@ -251,6 +261,11 @@ export const providerMeta: Record<string, ProviderConfig> = {
   },
   groq: {
     name: "Groq",
+    maskedKey: "gsk-••••a3f1",
+    workers: [],
+  },
+  cerebras: {
+    name: "Cerebras",
     maskedKey: "",
     workers: [],
   },
@@ -266,6 +281,84 @@ export const providerMeta: Record<string, ProviderConfig> = {
   },
 };
 
+// ---- 5a. Provider Deployments (hosting-type providers) --------------------
+
+export const providerDeployments: Record<string, Deployment[]> = {
+  azure: [
+    { id: "dep-1", name: "gpt-4o-prod", status: "passed", foundationalModelId: "gpt-4o" },
+    { id: "dep-2", name: "gpt-35-turbo", status: "passed", foundationalModelId: "gpt-35-turbo" },
+  ],
+  bedrock: [
+    { id: "dep-3", name: "anthropic.claude-3-5-sonnet-v2", status: "passed", foundationalModelId: "claude-35-sonnet" },
+    { id: "dep-4", name: "meta.llama3-1-70b-instruct-v1", status: "passed", foundationalModelId: "llama-31-70b" },
+  ],
+};
+
+// ---- 5b. Catalog Models (per-provider model lists) ------------------------
+
+export interface CatalogModel {
+  id: string;
+  name: string;
+  capability: "chat" | "code" | "vision" | "embedding";
+  params: string;
+  enabled: boolean;
+}
+
+export interface FoundationalModel {
+  id: string;
+  name: string;
+  family: string;
+  capabilities: string[];
+}
+
+export const foundationalModels: FoundationalModel[] = [
+  // OpenAI
+  { id: "gpt-4o", name: "GPT-4o", family: "OpenAI", capabilities: ["Chat", "Vision"] },
+  { id: "gpt-4o-mini", name: "GPT-4o Mini", family: "OpenAI", capabilities: ["Chat"] },
+  { id: "gpt-4-turbo", name: "GPT-4 Turbo", family: "OpenAI", capabilities: ["Chat", "Vision"] },
+  { id: "gpt-35-turbo", name: "GPT-3.5 Turbo", family: "OpenAI", capabilities: ["Chat"] },
+  { id: "o1", name: "o1", family: "OpenAI", capabilities: ["Chat", "Reasoning"] },
+  { id: "o1-mini", name: "o1 Mini", family: "OpenAI", capabilities: ["Chat", "Reasoning"] },
+  // Anthropic
+  { id: "claude-35-sonnet", name: "Claude 3.5 Sonnet", family: "Anthropic", capabilities: ["Chat", "Code", "Vision"] },
+  { id: "claude-3-haiku", name: "Claude 3 Haiku", family: "Anthropic", capabilities: ["Chat"] },
+  { id: "claude-3-opus", name: "Claude 3 Opus", family: "Anthropic", capabilities: ["Chat", "Code", "Vision"] },
+  // Meta
+  { id: "llama-31-70b", name: "Llama 3.1 70B", family: "Meta", capabilities: ["Chat", "Code"] },
+  { id: "llama-31-8b", name: "Llama 3.1 8B", family: "Meta", capabilities: ["Chat"] },
+  { id: "llama-33-70b", name: "Llama 3.3 70B", family: "Meta", capabilities: ["Chat", "Code"] },
+  // Google
+  { id: "gemini-15-pro", name: "Gemini 1.5 Pro", family: "Google", capabilities: ["Chat", "Vision"] },
+  { id: "gemini-15-flash", name: "Gemini 1.5 Flash", family: "Google", capabilities: ["Chat"] },
+  // Mistral
+  { id: "mistral-large", name: "Mistral Large", family: "Mistral", capabilities: ["Chat", "Code"] },
+  { id: "mixtral-8x7b", name: "Mixtral 8x7B", family: "Mistral", capabilities: ["Chat"] },
+];
+
+export interface Deployment {
+  id: string;
+  name: string;
+  status: "untested" | "testing" | "passed" | "failed";
+  error?: string;
+  foundationalModelId?: string;
+}
+
+export const catalogModels: Record<string, CatalogModel[]> = {
+  groq: [
+    { id: "llama-3.3-70b", name: "Llama 3.3 70B", capability: "chat", params: "70B", enabled: true },
+    { id: "llama-3.1-8b", name: "Llama 3.1 8B", capability: "chat", params: "8B", enabled: true },
+    { id: "mixtral-8x7b", name: "Mixtral 8x7B", capability: "chat", params: "MoE · 46.7B", enabled: true },
+    { id: "llama-3.2-11b-vision", name: "Llama 3.2 11B Vision", capability: "vision", params: "11B", enabled: false },
+    { id: "gemma-2-9b", name: "Gemma 2 9B", capability: "chat", params: "9B", enabled: false },
+  ],
+  cerebras: [
+    { id: "llama-3.3-70b", name: "Llama 3.3 70B", capability: "chat", params: "70B", enabled: true },
+    { id: "llama-3.1-8b", name: "Llama 3.1 8B", capability: "chat", params: "8B", enabled: true },
+    { id: "llama-3.1-70b", name: "Llama 3.1 70B", capability: "chat", params: "70B", enabled: true },
+    { id: "deepseek-r1-distill-70b", name: "DeepSeek R1 Distill 70B", capability: "code", params: "70B", enabled: false },
+  ],
+};
+
 // ---- 6. Self-Hosted Meta --------------------------------------------------
 
 export const selfHostedMeta: Record<
@@ -275,6 +368,8 @@ export const selfHostedMeta: Record<
     endpointUrl: string;
     maskedKey: string;
     modelId: string;
+    foundationalModelId?: string;
+    compatMethod?: "openai" | "custom";
     workers: WorkerUsage[];
   }
 > = {
@@ -283,6 +378,8 @@ export const selfHostedMeta: Record<
     endpointUrl: "https://llm.marico.internal/v1",
     maskedKey: "mk-••••8f3a",
     modelId: "llama-3.1-70b",
+    foundationalModelId: "llama-31-70b",
+    compatMethod: "openai",
     workers: [{ model: "Llama 3.1 70B", workerCount: 2 }],
   },
 };
@@ -303,6 +400,7 @@ export const testMessages: Record<string, string> = {
   minimax: "Tested MiniMax abab6.5 \u00b7 147ms response",
   moonshot: "Tested Moonshot Kimi \u00b7 156ms response",
   huggingface: "Tested Llama 3.1 8B via HF Inference \u00b7 185ms response",
+  cerebras: "Tested Llama 3.3 70B via Cerebras \u00b7 28ms response",
   "marico-llm": "Tested Llama 3.1 70B (self-hosted) \u00b7 78ms response",
 };
 
@@ -323,6 +421,7 @@ export const providerNames: Record<string, string> = {
   groq: "Groq",
   xai: "xAI",
   huggingface: "HuggingFace",
+  cerebras: "Cerebras",
   "marico-llm": "Marico Internal LLM",
 };
 

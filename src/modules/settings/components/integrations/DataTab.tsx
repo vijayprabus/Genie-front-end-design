@@ -4,32 +4,13 @@ import { toast } from "sonner";
 import { integrationLogoMap } from "./IntegrationLogos";
 import { useBreakpoint } from "@/shared/hooks/useBreakpoint";
 import { useLayoutContext } from "@/modules/settings/components/SettingsLayout";
-
-const f = "Inter, sans-serif";
-
-const ws = {
-  page: "#FAF8F5", surface: "#FFFDF9", muted: "#F0EBE4",
-  elevated: "#F5F0EB", border: "#E7E0D8", divider: "#F0EBE4", inputBorder: "#D6D3D1",
-  heading: "#292524", body: "#44403C", secondary: "#78716C", muted_text: "#A8A29E",
-  disabled: "#D6D3D1", primary: "#7C3AED", primaryLight: "#EDE9FE",
-  success: "#10B981", error: "#E11D48", hoverBg: "#EDE8E3",
-};
+import { ws, f } from "@/shared/utils/contentTokens";
+import { Card, SectionLabel, ShimmerBar, Toggle, AnimatedCheck, AnimatedCheckMuted, ListRow, DetailPanelShell } from "@/shared/components/settings";
 
 const GLOBAL_CSS = `
   @keyframes int-pulse {
     0%, 100% { opacity: 0.15; transform: scale(1); }
     50% { opacity: 0; transform: scale(1.6); }
-  }
-  @keyframes int-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-  @keyframes int-acheck-circle { 100% { stroke-dashoffset: 0; } }
-  @keyframes int-acheck-check { 100% { stroke-dashoffset: 0; } }
-  @keyframes int-toggle-glow {
-    0% { box-shadow: 0 0 0 0 rgba(124,58,237,0.4); }
-    50% { box-shadow: 0 0 0 4px rgba(124,58,237,0.15); }
-    100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
   }
 
   /* Thin scrollbar for page */
@@ -45,18 +26,6 @@ const GLOBAL_CSS = `
 
 const spring = "cubic-bezier(0.22, 1, 0.36, 1)";
 
-/* ── Shared components ───────────────────────────────────────── */
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <h3 style={{ fontSize: 11, fontWeight: 500, color: ws.muted_text, margin: "0 0 10px", fontFamily: f }}>{children}</h3>
-  );
-}
-
-function Card({ children }: { children: React.ReactNode }) {
-  return <div style={{ backgroundColor: ws.surface, border: `1px solid ${ws.border}`, borderRadius: 14, overflow: "hidden" }}>{children}</div>;
-}
-
 function ColorCircle({ color }: { color: string }) {
   return <div style={{ width: 20, height: 20, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />;
 }
@@ -70,56 +39,6 @@ function HealthDot({ label, color }: { label: string; color: string }) {
       </span>
       {label}
     </span>
-  );
-}
-
-function Toggle({ on, onChange, pulsing }: { on: boolean; onChange: (v: boolean) => void; pulsing?: boolean }) {
-  return (
-    <button role="switch" aria-checked={on} onClick={() => onChange(!on)} style={{
-      width: 36, height: 20, borderRadius: 10, border: "none", cursor: "pointer",
-      backgroundColor: "#F0EBE4", position: "relative",
-      transition: "background-color 0.2s", flexShrink: 0, padding: 0,
-    }}>
-      <span style={{
-        position: "absolute", top: 2, left: on ? 18 : 2,
-        width: 16, height: 16, borderRadius: "50%",
-        backgroundColor: on ? "#7C3AED" : "#A8A29E",
-        transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
-        animation: pulsing ? "int-toggle-glow 0.8s ease-out" : "none",
-      }} />
-    </button>
-  );
-}
-
-/* ── Skeleton shimmer ────────────────────────────────────────── */
-
-function ShimmerBar({ width, height, mb = 0, delay = 0 }: { width: string | number; height: number; mb?: number; delay?: number }) {
-  return <div style={{ width, height, borderRadius: 6, marginBottom: mb, background: `linear-gradient(90deg, ${ws.muted} 25%, ${ws.elevated} 50%, ${ws.muted} 75%)`, backgroundSize: "200% 100%", animation: `int-shimmer 1.5s ease-in-out infinite`, animationDelay: `${delay}ms` }} />;
-}
-
-/* ── Animated checkmark (SVG stroke-dashoffset) ──────────────── */
-
-function AnimatedCheck({ size = 36 }: { size?: number }) {
-  const [k] = useState(() => Date.now());
-  return (
-    <svg key={k} width={size} height={size} viewBox="0 0 52 52" style={{ display: "block" }}>
-      <circle cx="26" cy="26" r="24" fill="none" stroke="#10B981" strokeWidth="2"
-        style={{ strokeDasharray: 151, strokeDashoffset: 151, animation: "int-acheck-circle 0.5s cubic-bezier(0.65,0,0.45,1) forwards" }} />
-      <path fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"
-        style={{ strokeDasharray: 36, strokeDashoffset: 36, animation: "int-acheck-check 0.3s cubic-bezier(0.65,0,0.45,1) 0.5s forwards" }} />
-    </svg>
-  );
-}
-
-function AnimatedCheckMuted({ size = 36 }: { size?: number }) {
-  const [k] = useState(() => Date.now());
-  return (
-    <svg key={k} width={size} height={size} viewBox="0 0 52 52" style={{ display: "block" }}>
-      <circle cx="26" cy="26" r="24" fill="none" stroke="#A8A29E" strokeWidth="2"
-        style={{ strokeDasharray: 151, strokeDashoffset: 151, animation: "int-acheck-circle 0.5s cubic-bezier(0.65,0,0.45,1) forwards" }} />
-      <path fill="none" stroke="#A8A29E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"
-        style={{ strokeDasharray: 36, strokeDashoffset: 36, animation: "int-acheck-check 0.3s cubic-bezier(0.65,0,0.45,1) 0.5s forwards" }} />
-    </svg>
   );
 }
 
@@ -626,18 +545,7 @@ export default function DataTab() {
     const isConnected = item.enabled && item.connected;
     const isHovered = hoveredRowId === item.id;
     return (
-      <div key={item.id} role="button" tabIndex={0} aria-selected={isSelected}
-        onClick={() => handleSelectItem(item.id)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSelectItem(item.id); } }}
-        onMouseEnter={(e) => { setHoveredRowId(item.id); if (!isSelected) e.currentTarget.style.backgroundColor = ws.hoverBg; }}
-        onMouseLeave={(e) => { setHoveredRowId(null); e.currentTarget.style.backgroundColor = isSelected ? ws.elevated : "transparent"; }}
-        style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: isMobile ? "14px 14px" : "10px 14px", cursor: "pointer", transition: "background-color 0.15s",
-          borderBottom: last ? "none" : `1px solid ${ws.divider}`,
-          backgroundColor: isSelected ? ws.elevated : "transparent",
-        }}
-      >
+      <ListRow key={item.id} onClick={() => handleSelectItem(item.id)} selected={isSelected} last={last} padding={isMobile ? "14px 14px" : "10px 14px"} onMouseEnter={() => setHoveredRowId(item.id)} onMouseLeave={() => setHoveredRowId(null)}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
           <div style={{ flexShrink: 0 }}>{Logo ? <Logo size={20} /> : <ColorCircle color={item.color} />}</div>
           <span style={{ fontSize: isMobile ? 14 : 13, fontWeight: 500, color: ws.body, fontFamily: f, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.name}</span>
@@ -663,7 +571,7 @@ export default function DataTab() {
           {!item.enabled && <span style={{ fontSize: isMobile ? 13 : 12, color: ws.muted_text, fontFamily: f, whiteSpace: "nowrap" }}>{item.description}</span>}
           <ChevronRight size={14} color={ws.disabled} />
         </div>
-      </div>
+      </ListRow>
     );
   }
 
@@ -736,68 +644,9 @@ export default function DataTab() {
         </div>
       </div>
 
-      {/* Backdrop overlay — non-desktop */}
-      {!isDesktop && (
-        <div
-          onClick={handleClosePanel}
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.25)",
-            opacity: panelOpen ? 1 : 0,
-            pointerEvents: panelOpen ? "auto" : "none",
-            transition: `opacity 0.24s ${spring}`,
-            zIndex: 9,
-          }}
-        />
-      )}
-
-      {/* Panel — side panel or bottom sheet */}
-      <div data-int-panel style={isMobile ? {
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: "85vh",
-        transform: panelOpen ? "translateY(0)" : "translateY(100%)",
-        opacity: panelOpen ? 1 : 0,
-        transition: `transform 0.32s ${spring}, opacity 0.2s ${spring}`,
-        pointerEvents: panelOpen ? "auto" : "none",
-        zIndex: 10,
-      } : {
-        position: "fixed",
-        top: 80,
-        right: isDesktop ? 32 : 20,
-        width: isDesktop ? 480 : "min(480px, calc(100vw - 260px))",
-        height: "calc(100vh - 100px)",
-        transform: panelOpen ? "translateX(0)" : "translateX(calc(100% + 40px))",
-        opacity: panelOpen ? 1 : 0,
-        transition: `transform 0.32s ${spring}, opacity 0.24s ${spring}`,
-        pointerEvents: panelOpen ? "auto" : "none",
-        zIndex: 10,
-      }}>
-        <div style={{
-          width: "100%", height: "100%",
-          borderRadius: isMobile ? "20px 20px 0 0" : 14,
-          backgroundColor: ws.surface,
-          border: isMobile ? "none" : `1px solid ${ws.border}`,
-          boxShadow: isMobile
-            ? "0 -4px 20px rgba(0,0,0,0.08)"
-            : "0 4px 16px -4px rgba(0,0,0,0.08), 0 1px 4px -1px rgba(0,0,0,0.04)",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-        }}>
-          {isMobile && (
-            <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 2px", flexShrink: 0 }}>
-              <div style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: "#D6D3D1" }} />
-            </div>
-          )}
-          <div style={{ flex: 1, minHeight: 0, overflow: "hidden", opacity: panelFading ? 0 : 1, transition: "opacity 0.2s ease" }}>
-            {renderedItem && <DetailPanel item={renderedItem} onClose={handleClosePanel} />}
-          </div>
-        </div>
-      </div>
+      <DetailPanelShell open={panelOpen} onClose={handleClosePanel} isMobile={isMobile} isDesktop={isDesktop} dataAttr="int-panel" fading={panelFading}>
+        {renderedItem && <DetailPanel item={renderedItem} onClose={handleClosePanel} />}
+      </DetailPanelShell>
     </>
   );
 }

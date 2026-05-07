@@ -7,7 +7,7 @@ export default function IndexPage() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   useEffect(() => {
-    navigate(isAuthenticated ? "/chat" : "/login", { replace: true });
+    navigate(isAuthenticated ? "/home" : "/login", { replace: true });
   }, [isAuthenticated, navigate]);
 
   return null;

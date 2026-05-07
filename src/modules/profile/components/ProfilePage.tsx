@@ -2,18 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { ws as baseWs, f } from "@/shared/utils/contentTokens";
+import { Card } from "@/shared/components/settings";
 
-const f = "Inter, sans-serif";
-
-const ws = {
-  page: "#FAF8F5", surface: "#FFFDF9", sidebar: "#F5F0EB", muted: "#F0EBE4",
-  elevated: "#F5F0EB", border: "#E7E0D8", divider: "#F0EBE4", inputBorder: "#D6D3D1",
-  heading: "#292524", body: "#44403C", secondary: "#78716C", muted_text: "#A8A29E",
-  disabled: "#D6D3D1", primary: "#7C3AED", primaryHover: "#6D28D9", primaryLight: "#EDE9FE",
-  primaryDark: "#5B21B6", success: "#10B981", successFg: "#065F46", successBg: "#ECFDF5",
-  warning: "#F59E0B", warningFg: "#92400E", warningBg: "#FFFBEB", error: "#E11D48",
-  errorFg: "#9F1239", errorBg: "#FFF1F2", hoverBg: "#EDE8E3",
-};
+const ws = { ...baseWs, sidebar: baseWs.elevated };
 
 const teams = [
   {
@@ -24,7 +16,7 @@ const teams = [
   },
   {
     initials: "AN",
-    bg: "#7C3AED",
+    bg: ws.primary,
     name: "Analytics",
     desc: "Data science and business intelligence \u00B7 8 members",
   },
@@ -57,16 +49,9 @@ export default function ProfilePage() {
           </div>
 
           {/* Profile card */}
-          <div
-            style={{
-              marginTop: 16,
-              backgroundColor: ws.surface,
-              border: `1px solid ${ws.border}`,
-              borderRadius: 12,
-              padding: 20,
-              boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 12px -2px rgba(0,0,0,0.05)",
-            }}
-          >
+          <div style={{ marginTop: 16 }}>
+          <Card>
+          <div style={{ padding: 20 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
               {/* Avatar */}
               <div
@@ -81,7 +66,7 @@ export default function ProfilePage() {
                   flexShrink: 0,
                 }}
               >
-                <span style={{ fontSize: 16, fontWeight: 700, color: "#FFF" }}>PA</span>
+                <span style={{ fontSize: 16, fontWeight: 700, color: ws.onPrimary }}>PA</span>
               </div>
               {/* Info */}
               <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -109,6 +94,8 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
+          </div>
+          </Card>
           </div>
 
           {/* YOUR TEAMS */}
@@ -154,7 +141,7 @@ export default function ProfilePage() {
                     flexShrink: 0,
                   }}
                 >
-                  <span style={{ fontSize: 10, fontWeight: 600, color: "#FFF" }}>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: ws.onPrimary }}>
                     {team.initials}
                   </span>
                 </div>
@@ -245,11 +232,11 @@ export default function ProfilePage() {
               alignItems: "center",
               fontSize: 12,
               fontWeight: 500,
-              color: logoutHover ? "#991B1B" : ws.secondary,
-              border: `1px solid ${logoutHover ? "#FEE2E2" : ws.border}`,
+              color: logoutHover ? ws.errorTextHover : ws.secondary,
+              border: `1px solid ${logoutHover ? ws.errorBorder : ws.border}`,
               padding: "6px 14px",
               borderRadius: 8,
-              backgroundColor: logoutHover ? "#FEF2F2" : ws.surface,
+              backgroundColor: logoutHover ? ws.errorBg : ws.surface,
               cursor: "pointer",
               fontFamily: f,
               transition: "all 0.15s",
