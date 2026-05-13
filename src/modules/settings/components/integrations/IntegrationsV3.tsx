@@ -25,18 +25,6 @@ function ColorCircle({ color }: { color: string }) {
   return <div style={{ width: 20, height: 20, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />;
 }
 
-function HealthDot({ label, color }: { label: string; color: string }) {
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color, fontFamily: f }}>
-      <span style={{ position: "relative", width: 8, height: 8, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ position: "absolute", width: 8, height: 8, borderRadius: "50%", backgroundColor: color, opacity: 0.25, animation: "int-pulse 3s ease-in-out infinite" }} />
-        <span style={{ position: "relative", width: 6, height: 6, borderRadius: "50%", backgroundColor: color }} />
-      </span>
-      {label}
-    </span>
-  );
-}
-
 /* ── Data types ──────────────────────────────────────────────── */
 
 type TabId = "all" | "apps" | "dataSources" | "services" | "models";
@@ -688,7 +676,7 @@ export default function IntegrationsV3() {
   const [renderedItem, setRenderedItem] = useState<IntegrationItem | null>(null);
   const [renderedModelItem, setRenderedModelItem] = useState<ModelProviderItem | null>(null);
   const panelAnchorRef = useRef<HTMLDivElement>(null);
-  const [panelPos, setPanelPos] = useState({ top: 0, right: 0 });
+  const [, setPanelPos] = useState({ top: 0, right: 0 });
   const [pageLoading, setPageLoading] = useState(true);
 
   const isAllTab = activeTab === "all";

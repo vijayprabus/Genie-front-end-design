@@ -121,8 +121,6 @@ export default function EntitySelector({
     }
   };
 
-  const hasSelected = selectedItems.length > 0;
-
   return (
     <div ref={containerRef} style={{ position: "relative", fontFamily: f }}>
       {/* Card with selected rows + ghost input row */}
@@ -136,7 +134,7 @@ export default function EntitySelector({
         overflowY: maxHeight ? "auto" : undefined,
       }}>
         {/* Selected item rows */}
-        {selectedItems.map((item, i) => {
+        {selectedItems.map((item) => {
           const isHovered = hoveredSelectedId === item.id;
           const isFlashing = flashId === item.id;
           return (

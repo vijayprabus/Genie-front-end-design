@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { ChevronRight, Plus, Zap } from "lucide-react";
 import { useLayoutContext } from "@/modules/settings/components/SettingsLayout";
 import ModelPanel from "../integrations/ModelPanel";
-import GenieLogo from "../GenieLogo";
 import { providerLogoMap } from "./ProviderLogos";
 import {
   type ModelProviderItem,
@@ -99,7 +98,7 @@ export default function ModelsTab() {
   const [panelFading, setPanelFading] = useState(false);
   const [renderedItem, setRenderedItem] = useState<ModelProviderItem | null>(null);
   const [pageLoading, setPageLoading] = useState(true);
-  const { searchQuery, setSearchQuery } = useLayoutContext();
+  const { searchQuery } = useLayoutContext();
 
   /* Data assembly */
   const addSelfhostedItem: ModelProviderItem = {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { History, SquarePen, Share2, Pencil, Loader2, Check, MessageSquare, ChevronDown } from "lucide-react";
 import { Sun, SunHorizon, Moon } from "@phosphor-icons/react";
 import { useChat } from "@/modules/chat/hooks/useChat";

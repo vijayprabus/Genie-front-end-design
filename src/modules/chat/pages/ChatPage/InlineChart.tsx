@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
+import type { MouseHandlerDataParam } from "recharts/types/synchronisation/types";
 import {
   BarChart,
   Bar,
@@ -167,15 +168,19 @@ function ChartContent({
     label?: string;
   }>({ active: false });
 
-  const handleMobileClick = useCallback((data: { activePayload?: Array<{ value: number }>; activeLabel?: string } | null) => {
-    if (!data?.activePayload?.length) {
+  // recharts onClick passes MouseHandlerDataParam; activePayload is a runtime field not reflected
+  // in recharts v3 types, so we cast the param to access it safely
+  const handleMobileClick = useCallback((data: MouseHandlerDataParam | null) => {
+    const payload = (data as { activePayload?: Array<{ value: number }> } | null)?.activePayload;
+    if (!payload?.length) {
       setMobileTooltip({ active: false });
       return;
     }
     setMobileTooltip({
       active: true,
-      payload: data.activePayload,
-      label: data.activeLabel,
+      payload,
+      // activeLabel is string | number | undefined; convert to string for display
+      label: data?.activeLabel != null ? String(data.activeLabel) : undefined,
     });
   }, []);
 

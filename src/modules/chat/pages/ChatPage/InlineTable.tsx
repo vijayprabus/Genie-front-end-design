@@ -1194,8 +1194,6 @@ export function InlineTable({
               <div style={{ position: "relative" }}>
                 <button
                   onClick={() => setIsFullscreen(true)}
-                  onMouseEnter={() => setExpandTooltip(true)}
-                  onMouseLeave={() => setExpandTooltip(false)}
                   style={{
                     background: "none",
                     border: "none",
