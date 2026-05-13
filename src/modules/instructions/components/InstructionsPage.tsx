@@ -7,8 +7,6 @@ import {
   Code,
   Copy,
   Check,
-  GitBranch,
-  PencilSimple,
   Bell,
   CaretRight,
   SpinnerGap,
@@ -327,10 +325,6 @@ function InstructionPanel({
   }, []);
 
   const hasDraft = item.status === "published_with_draft";
-  const isDraftOnly = item.status === "draft";
-  const actionLabel = hasDraft ? "Review Draft" : isDraftOnly ? "Continue Editing" : "Edit";
-  const ActionIcon = hasDraft ? GitBranch : PencilSimple;
-  const isPrimary = hasDraft;
 
   const [copied, setCopied] = useState(false);
   const [navigating, setNavigating] = useState(false);
@@ -493,7 +487,6 @@ function InstructionPanel({
 export default function InstructionsPage() {
   const bp = useBreakpoint();
   const isMobile = bp === "mobile";
-  const isDesktop = bp === "desktop";
   const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");

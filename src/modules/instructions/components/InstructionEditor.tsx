@@ -2,13 +2,8 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  CaretDoubleLeft,
-  X,
-  ChatCircle,
-  GitFork,
-  FileCode,
 } from "@phosphor-icons/react";
-import { Copy, Check, ArrowUp, RotateCcw, SquarePen, ChevronsLeft, Shield, Paperclip, Mic, Sparkles, PanelLeftClose, PanelRightClose, Maximize2, GitBranch as LucideGitBranch, FileCode as LucideFileCode, FlaskConical, CircleCheck, BookOpen, TriangleAlert, PanelRightOpen, PanelLeftOpen, Plus, Minus, Scan, Brain, Plug, Layers, ChevronDown, Eye, ChevronRight, CheckCircle2, X as LucideX, LayoutTemplate, MessageCircle } from "lucide-react";
+import { Copy, Check, ArrowUp, RotateCcw, SquarePen, Shield, Paperclip, Mic, Sparkles, PanelLeftClose, PanelRightClose, Maximize2, GitBranch as LucideGitBranch, FileCode as LucideFileCode, FlaskConical, CircleCheck, BookOpen, TriangleAlert, Plus, Minus, Scan, Brain, Plug, Layers, ChevronDown, Eye, ChevronRight, CheckCircle2, X as LucideX, LayoutTemplate, MessageCircle } from "lucide-react";
 import { instructions } from "./instructionData";
 import { ws as baseWs, f, spring } from "@/shared/utils/contentTokens";
 import { ShimmerBar } from "@/shared/components/settings";
@@ -96,12 +91,10 @@ function PageSkeleton() {
 function PanelStrip({
   icon,
   label,
-  side,
   onClick,
 }: {
   icon: "chat" | "code" | "dag";
   label: string;
-  side: "left" | "center" | "right";
   onClick: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
@@ -170,29 +163,6 @@ interface EditorChatMessage {
   title?: string; // optional bold title for assistant messages
   timestamp: string; // ISO string
 }
-
-const MOCK_MESSAGES: EditorChatMessage[] = [
-  {
-    id: "1",
-    role: "assistant",
-    title: "Ready to help",
-    content: "I can help you refine this instruction. What would you like to change?",
-    timestamp: "2026-04-16T10:05:00Z",
-  },
-  {
-    id: "2",
-    role: "user",
-    content: "Add a fraud detection step before risk scoring",
-    timestamp: "2026-04-16T10:06:00Z",
-  },
-  {
-    id: "3",
-    role: "assistant",
-    title: "Updated",
-    content: "Fraud signal detection step added before Step 4. It will analyze behavioral patterns and device fingerprints.",
-    timestamp: "2026-04-16T10:06:15Z",
-  },
-];
 
 // ---------------------------------------------------------------------------
 // formatTime helper
@@ -2254,7 +2224,6 @@ export default function InstructionEditor() {
             <PanelStrip
               icon="chat"
               label="Chat"
-              side="left"
               onClick={() => { setChatWidth(CHAT_W); setChatOpen(true); }}
             />
           )}
@@ -2413,7 +2382,6 @@ export default function InstructionEditor() {
               <PanelStrip
                 icon="code"
                 label="Editor"
-                side="center"
                 onClick={() => setYamlState("open")}
               />
             )}
@@ -2449,7 +2417,6 @@ export default function InstructionEditor() {
             <PanelStrip
               icon="dag"
               label="DAG"
-              side="right"
               onClick={() => { setDagWidth(DAG_W); setDagOpen(true); }}
             />
           )}

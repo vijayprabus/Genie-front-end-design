@@ -15,7 +15,6 @@ const TOOLS: { icon: LucideIcon; title: string; desc: string; prompt: string }[]
 const CARD_WIDTH = 176;
 const GAP = 8;
 const VISIBLE_WIDTH = 544;
-const PAGE_SIZE = 3;
 
 function ToolCard({ icon: Icon, title, desc, onClick }: {
   icon: LucideIcon; title: string; desc: string; onClick: () => void;

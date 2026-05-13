@@ -329,9 +329,7 @@ export function MessageInput({ onSend, disabled = false }: MessageInputProps) {
       if (afterSpan && afterSpan.nodeType === Node.TEXT_NODE) {
         range.setStart(afterSpan, 0);
       } else {
-        // Create a text node after span if none exists
-        const textNode = document.createTextNode('\u200B'); // zero-width space workaround
-        // Actually use empty string — will be cleaned on send
+        // Create an empty text node after span for cursor placement (cleaned on send)
         const realText = document.createTextNode('');
         el.appendChild(realText);
         range.setStart(realText, 0);

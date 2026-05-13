@@ -26,18 +26,6 @@ function ColorCircle({ color }: { color: string }) {
   return <div style={{ width: 20, height: 20, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />;
 }
 
-function HealthDot({ label, color }: { label: string; color: string }) {
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color, fontFamily: f }}>
-      <span style={{ position: "relative", width: 8, height: 8, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-        <span style={{ position: "absolute", width: 8, height: 8, borderRadius: "50%", backgroundColor: color, opacity: 0.25, animation: "int-pulse 3s ease-in-out infinite" }} />
-        <span style={{ position: "relative", width: 6, height: 6, borderRadius: "50%", backgroundColor: color }} />
-      </span>
-      {label}
-    </span>
-  );
-}
-
 /* ── Shared button styles ─────────────────────────────────────── */
 
 const primaryBtnStyle: React.CSSProperties = {

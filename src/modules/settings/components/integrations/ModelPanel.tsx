@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import {
   X, Zap, CircleDollarSign, RefreshCw, Trash2, FlaskConical,
-  Loader2, Eye, EyeOff, ChevronDown, Server, Info, Check, TriangleAlert, Plus, RotateCw, XCircle,
+  Loader2, Eye, EyeOff, ChevronDown, Server, Info, Check, TriangleAlert, RotateCw, XCircle,
   Activity, Database,
 } from "lucide-react";
 import type { ModelProviderItem, Deployment, FoundationalModel } from "./modelData";
-import { providerMeta, selfHostedMeta, testMessages, bedrockRegions, providerNames, foundationalModels, providerDeployments, configuredProviders, selfHostedConfigured } from "./modelData";
+import { providerMeta, selfHostedMeta, bedrockRegions, providerNames, foundationalModels, providerDeployments, configuredProviders, selfHostedConfigured } from "./modelData";
 import { providerLogoMap } from "../models/ProviderLogos";
 
 import { ws, f } from "@/shared/utils/contentTokens";
@@ -307,26 +307,6 @@ function DeploymentManager({ deployments, onChange, paused }: { deployments: Dep
   );
 }
 
-function Workers({ workers }: { workers: { model: string; workerCount: number }[] }) {
-  return (
-    <div style={{ marginTop: 20 }}>
-      <div style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: 0.3, color: ws.muted_text, fontFamily: f, marginBottom: 10 }}>Workers using this provider</div>
-      {workers.length === 0 ? (
-        <div style={{ fontSize: 12, color: ws.muted_text, fontFamily: f, fontStyle: "italic" }}>No workers configured yet.</div>
-      ) : (
-        <div style={{ borderRadius: 8, border: `1px solid ${ws.divider}`, overflow: "hidden" }}>
-          {workers.map((w, i) => (
-            <div key={w.model} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 12px", borderBottom: i < workers.length - 1 ? `1px solid ${ws.divider}` : "none" }}>
-              <span style={{ fontSize: 13, color: ws.body, fontFamily: f }}>{w.model}</span>
-              <span style={{ fontSize: 12, color: ws.muted_text, fontFamily: f }}>{w.workerCount} worker{w.workerCount !== 1 ? "s" : ""}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function ProvLogo({ id, size = 24 }: { id: string; size?: number }) {
   const L = providerLogoMap[id];
   if (L) return <L size={size} />;
@@ -418,7 +398,7 @@ function Confirm({ onClose, onCancel, onConfirm, iconColor, title, description, 
 
 /* ── Test button with inline verified state ──────────────────── */
 
-function TestBtn({ providerId, onFail }: { providerId: string; modelId?: string; onFail?: () => void }) {
+function TestBtn({ providerId: _providerId, onFail }: { providerId: string; modelId?: string; onFail?: () => void }) {
   const [state, setState] = useState<"idle" | "testing" | "pass" | "fail">("idle");
 
   const doTest = () => {
@@ -616,7 +596,6 @@ function EditProvider({ item, onClose }: { item: ModelProviderItem; onClose: () 
   const [bApiKey, setBApiKey] = useState("");
   const [azKey, setAzKey] = useState("");
   const [endpoint, setEndpoint] = useState(meta.endpointUrl || "");
-  const [deployment, setDeployment] = useState(meta.deploymentName || "");
   const [testFailed, setTestFailed] = useState(false);
   const [deps, setDeps] = useState<Deployment[]>(() => (providerDeployments[item.id] || []).map((d) => ({ ...d })));
 
@@ -780,7 +759,6 @@ function AddProvider({ item, onClose }: { item: ModelProviderItem; onClose: () =
   const [bApiKey, setBApiKey] = useState("");
   const [azKey, setAzKey] = useState("");
   const [endpoint, setEndpoint] = useState("");
-  const [deployment, setDeployment] = useState("");
   const [hfDeployTab, setHfDeployTab] = useState<"inference" | "tgi">("inference");
   const [hfToken, setHfToken] = useState("");
   const [hfEndpoint, setHfEndpoint] = useState("");
