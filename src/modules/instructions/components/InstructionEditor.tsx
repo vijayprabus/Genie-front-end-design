@@ -640,7 +640,7 @@ function EditorInput({ onSend, placeholder = "Describe workflow changes..." }: {
               border: "none",
               background: hasContent
                 ? sendHovered
-                  ? "#6D28D9"
+                  ? "#3812CE"
                   : ws.primary
                 : ws.elevated,
               cursor: hasContent ? "pointer" : "default",
@@ -978,7 +978,7 @@ function VersionPill({
       ? `1px solid ${ws.primaryLight}`
       : `1px solid ${ws.border}`,
     background: pillActive ? ws.primaryLight : ws.elevated,
-    boxShadow: open ? `0 0 0 2px rgba(0,112,243,0.12)` : "none",
+    boxShadow: open ? `0 0 0 2px rgba(80,40,236,0.12)` : "none",
     transition: "background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease",
     fontFamily: f,
     outline: "none",
@@ -2014,7 +2014,7 @@ export default function InstructionEditor() {
                 <button onClick={() => setMode("editing")} style={{
                   height: 30, padding: "0 16px", borderRadius: 8, border: "none",
                   background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
-                  color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(0,112,243,0.2)",
+                  color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(80,40,236,0.2)",
                 }}>
                   Edit
                 </button>
@@ -2043,7 +2043,7 @@ export default function InstructionEditor() {
                 <button onClick={handleValidate} style={{
                   height: 30, padding: "0 16px", borderRadius: 8, border: "none",
                   background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
-                  color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(0,112,243,0.2)",
+                  color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(80,40,236,0.2)",
                 }}>
                   Validate
                 </button>
@@ -2080,7 +2080,7 @@ export default function InstructionEditor() {
                 <button onClick={handleStartTest} style={{
                   height: 30, padding: "0 16px", borderRadius: 8, border: "none",
                   background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
-                  color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(0,112,243,0.2)",
+                  color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(80,40,236,0.2)",
                   display: "flex", alignItems: "center", gap: 4,
                 }}>
                   <FlaskConical size={12} color="#FFF" />
@@ -2105,7 +2105,7 @@ export default function InstructionEditor() {
                 <button style={{
                   height: 30, padding: "0 16px", borderRadius: 8, border: "none",
                   background: ws.primary, cursor: "pointer", fontSize: 11, fontWeight: 600,
-                  color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(0,112,243,0.2)",
+                  color: "#FFF", fontFamily: f, boxShadow: "0 1px 3px rgba(80,40,236,0.2)",
                 }}>
                   Publish
                 </button>
@@ -2200,7 +2200,7 @@ export default function InstructionEditor() {
                   fontSize: 11, fontWeight: 600, color: "#FFF", fontFamily: f,
                   boxShadow: isSuccess
                     ? "0 0 0 4px rgba(0, 166, 90, 0.18), 0 1px 3px rgba(0,166,90,0.2)"
-                    : "0 1px 3px rgba(0,112,243,0.2)",
+                    : "0 1px 3px rgba(80,40,236,0.2)",
                   display: "flex", alignItems: "center", gap: 4,
                   transform: isSuccess ? "scale(1.05)" : "scale(1.0)",
                   transition: "background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease-out",

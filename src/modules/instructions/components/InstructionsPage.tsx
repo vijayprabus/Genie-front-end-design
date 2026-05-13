@@ -632,7 +632,7 @@ export default function InstructionsPage() {
                     fontFamily: f,
                     cursor: "pointer",
                     flexShrink: 0,
-                    boxShadow: "0 1px 3px rgba(0,112,243,0.2)",
+                    boxShadow: "0 1px 3px rgba(80,40,236,0.2)",
                     transition: "background 0.15s ease, transform 0.1s ease",
                   }}
                   onMouseEnter={(e) => {

@@ -58,7 +58,7 @@ const dangerBtnStyle: React.CSSProperties = {
   ...primaryBtnStyle, backgroundColor: ws.error,
 };
 
-function hoverPrimary(e: React.MouseEvent<HTMLButtonElement>) { e.currentTarget.style.backgroundColor = "#6D28D9"; }
+function hoverPrimary(e: React.MouseEvent<HTMLButtonElement>) { e.currentTarget.style.backgroundColor = "#3812CE"; }
 function leavePrimary(e: React.MouseEvent<HTMLButtonElement>) { e.currentTarget.style.backgroundColor = ws.primary; }
 function hoverDanger(e: React.MouseEvent<HTMLButtonElement>) { e.currentTarget.style.backgroundColor = "#BE123C"; }
 function leaveDanger(e: React.MouseEvent<HTMLButtonElement>) { e.currentTarget.style.backgroundColor = ws.error; }
@@ -610,7 +610,7 @@ export default function DataTab() {
                   padding: "0 16px", display: "flex", alignItems: "center", gap: 6,
                   transition: "background-color 0.15s", whiteSpace: "nowrap",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#6D28D9"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#3812CE"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ws.primary; }}
               >
                 <Plus size={15} strokeWidth={2} />

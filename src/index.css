@@ -19,10 +19,10 @@
   --ws-secondary: #52525B;
   --ws-muted-text: #71717A;
   --ws-disabled: #A1A1AA;
-  --ws-primary: #0070F3;
-  --ws-primary-hover: #0761D1;
-  --ws-primary-dark: #0550AE;
-  --ws-primary-light: #DBEAFE;
+  --ws-primary: var(--genie-violet-600);    /* #5028EC — H252° indigo, AAA 7.35:1 on white */
+  --ws-primary-hover: var(--genie-violet-700);  /* #3812CE */
+  --ws-primary-dark: var(--genie-violet-800);   /* #2A0D9B */
+  --ws-primary-light: var(--genie-violet-100);  /* #E4DEFC */
   --ws-success: #00A65A;
   --ws-success-bg: #E6F7EE;
   --ws-success-fg: #0A6E40;
@@ -47,10 +47,10 @@
   --ws-sidebar-icon-rest: #71717A;
   --ws-sidebar-icon-hover: #52525B;
   --ws-sidebar-kb-hint: #A1A1AA;
-  --ws-sidebar-active-bg: #DBEAFE;
-  --ws-sidebar-active-hover-bg: #BFDBFE;
+  --ws-sidebar-active-bg: var(--genie-violet-100);       /* #E4DEFC */
+  --ws-sidebar-active-hover-bg: var(--genie-violet-200); /* #C5B9F9 */
   --ws-sidebar-hover-bg: #DCDCDF;
-  --ws-sidebar-focus-ring: #93C5FD;
+  --ws-sidebar-focus-ring: var(--genie-violet-300);      /* #947CF4 */
   --ws-sidebar-scrollbar: #D4D4D8;
   --ws-sidebar-scrollbar-hover: #A1A1AA;
   --ws-sidebar-section-label: #A1A1AA;
@@ -75,7 +75,7 @@
   --dur-slow: 200ms;
 
   /* Brand logo */
-  --ws-brand-logo: #0070F3;
+  --ws-brand-logo: var(--genie-violet-600);  /* #5028EC */
 
   /* Effect tokens — Option D shadows (pure black) */
   --ws-button-inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 2px rgba(0, 0, 0, 0.12);
@@ -92,18 +92,18 @@
   --ws-canvas-margin: 8px 8px 0 0;
 
   /* ── Violet light-mode system — apps-a stress test ─────────────────── */
-  /* Brand Violet — 11 stops (perceptually uniform from #6246FF) */
-  --genie-violet-50: #F0EEFF;
-  --genie-violet-100: #E0D9FF;
-  --genie-violet-200: #C2B3FF;
-  --genie-violet-300: #9D80FF;
-  --genie-violet-400: #7D63FF;
-  --genie-violet-500: #6246FF;
-  --genie-violet-600: #4D34E0;
-  --genie-violet-700: #3A25BF;
-  --genie-violet-800: #28199E;
-  --genie-violet-900: #190F7D;
-  --genie-violet-950: #0D084F;
+  /* Brand Violet — H252° Genie Indigo ramp (12 stops, primary #5028EC) */
+  --genie-violet-50: #F3F1FE;
+  --genie-violet-100: #E4DEFC;
+  --genie-violet-200: #C5B9F9;
+  --genie-violet-300: #947CF4;
+  --genie-violet-400: #7151F0;
+  --genie-violet-500: #5E3AEE;
+  --genie-violet-600: #5028EC;
+  --genie-violet-700: #3812CE;
+  --genie-violet-800: #2A0D9B;
+  --genie-violet-900: #1C0967;
+  --genie-violet-950: #0F0640;
 
   /* Neutral Gray — violet-tinted, 13 stops */
   --genie-gray-0: #FFFFFF;
@@ -151,6 +151,96 @@
   --genie-teal: #5AC8FA;
   --genie-teal-bg: #E0F4FE;
   --genie-teal-fg: #2A7CA0;
+}
+
+/* ── data-theme="dark" — H252° indigo dark mode ───────────────────────
+   Full dark token set. Apply `data-theme="dark"` on <html> to activate.
+   Surfaces: #0A091F → #25226B lifted stack.
+   Dark primary #8267F4 (AAA+ on #0A091F). */
+[data-theme="dark"] {
+  --ws-page: #0A091F;
+  --ws-bg: #0A091F;
+  --ws-bg-alt: #14122E;
+  --ws-surface: #1A1845;
+  --ws-surface-2: #25226B;
+  --ws-elevated: #25226B;
+  --ws-muted: #1A1845;
+  --ws-hover-bg: rgba(130, 103, 244, 0.08);
+
+  --ws-border: #28245A;
+  --ws-border-mid: #3A3580;
+  --ws-divider: #28245A;
+  --ws-input-border: #3A3580;
+
+  --ws-heading: #EEECFF;
+  --ws-body: #EEECFF;
+  --ws-secondary: #9D98C8;
+  --ws-muted-text: #5E5A88;
+  --ws-disabled: rgba(238, 236, 255, 0.30);
+
+  --ws-text-1: #EEECFF;
+  --ws-text-2: #9D98C8;
+  --ws-text-3: #5E5A88;
+
+  --ws-primary: #8267F4;                /* refined for AAA on #0A091F */
+  --ws-primary-hover: #947CF4;          /* genie-violet-300 */
+  --ws-primary-dark: #C5B9F9;           /* genie-violet-200 */
+  --ws-primary-light: rgba(130, 103, 244, 0.14);
+  --ws-on-primary: #FFFFFF;
+
+  --ws-success: #4ADE80;
+  --ws-success-bg: rgba(74, 222, 128, 0.12);
+  --ws-success-fg: #4ADE80;
+  --ws-warning: #FBBF24;
+  --ws-warning-bg: rgba(251, 191, 36, 0.12);
+  --ws-warning-fg: #FBBF24;
+  --ws-error: #F87171;
+  --ws-error-bg: rgba(248, 113, 113, 0.12);
+  --ws-error-fg: #F87171;
+  --ws-error-border: rgba(248, 113, 113, 0.36);
+  --ws-error-hover: #F87171;
+  --ws-error-hover-bg: rgba(248, 113, 113, 0.18);
+  --ws-error-text-hover: #F87171;
+
+  --ws-toggle-bg: rgba(238, 236, 255, 0.18);
+  --ws-focus-ring: 0 0 0 3px rgba(130, 103, 244, 0.32);
+
+  /* Sidebar */
+  --ws-sidebar-bg: #14122E;
+  --ws-sidebar-zone: #1A1845;
+  --ws-sidebar-divider: #28245A;
+  --ws-sidebar-body: #B8B3D8;
+  --ws-sidebar-icon-rest: #9D98C8;
+  --ws-sidebar-icon-hover: #C5B9F9;
+  --ws-sidebar-kb-hint: #5E5A88;
+  --ws-sidebar-active-bg: rgba(130, 103, 244, 0.14);
+  --ws-sidebar-active-hover-bg: rgba(130, 103, 244, 0.22);
+  --ws-sidebar-hover-bg: #28245A;
+  --ws-sidebar-focus-ring: rgba(130, 103, 244, 0.32);
+  --ws-sidebar-scrollbar: #3A3580;
+  --ws-sidebar-scrollbar-hover: #5E5A88;
+  --ws-sidebar-section-label: #5E5A88;
+  --ws-sidebar-icon-btn-hover: #28245A;
+
+  --ws-sidebar-active-text: var(--ws-primary);
+  --ws-sidebar-active-icon: var(--ws-primary);
+  --ws-sidebar-brand-text: var(--ws-text-1);
+  --ws-sidebar-tooltip-bg: #1A1845;
+  --ws-sidebar-tooltip-text: var(--ws-text-1);
+
+  /* Brand logo */
+  --ws-brand-logo: #8267F4;
+
+  /* Active pill */
+  --ws-active-pill-bg: rgba(130, 103, 244, 0.14);
+  --ws-active-pill-hover: rgba(130, 103, 244, 0.22);
+
+  /* Effects */
+  --ws-card-shadow: 0 0 0 1px rgba(238, 236, 255, 0.08), 0 1px 3px rgba(0, 0, 0, 0.40), 0 8px 24px -4px rgba(0, 0, 0, 0.30);
+  --ws-card-border: 1px solid #28245A;
+  --ws-search-shadow: 0 0 0 1px rgba(238, 236, 255, 0.06), 0 1px 3px rgba(0, 0, 0, 0.30);
+  --ws-search-border: 1px solid #28245A;
+  --ws-button-inner-highlight: inset 0 1px 0 rgba(238, 236, 255, 0.12), 0 1px 2px rgba(0, 0, 0, 0.20);
 }
 
 /* ── data-theme="violet" — apps-a stress test ──────────────────────────
@@ -340,8 +430,8 @@
     --bg: 250 250 250;           /* #FAFAFA cool page bg */
     --fg: 24 24 27;              /* #18181B dark zinc body */
     --muted: 82 82 91;           /* #52525B cool secondary */
-    --primary: 0 112 243;        /* #0070F3 bright blue */
-    --ring: 0 112 243;           /* #0070F3 */
+    --primary: 80 40 236;        /* #5028EC H252° indigo */
+    --ring: 80 40 236;           /* #5028EC */
     --danger: 238 0 0;           /* #EE0000 */
     --warning: 245 166 35;       /* #F5A623 */
     --success: 0 166 90;         /* #00A65A */
@@ -407,9 +497,9 @@
 }
 
 @keyframes gf-toggle-glow {
-  0% { box-shadow: 0 0 0 0 rgba(0,112,243,0.4); }
-  50% { box-shadow: 0 0 0 4px rgba(0,112,243,0.15); }
-  100% { box-shadow: 0 0 0 0 rgba(0,112,243,0); }
+  0% { box-shadow: 0 0 0 0 rgba(80,40,236,0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(80,40,236,0.15); }
+  100% { box-shadow: 0 0 0 0 rgba(80,40,236,0); }
 }
 
 @keyframes gf-acheck-circle { 100% { stroke-dashoffset: 0; } }
