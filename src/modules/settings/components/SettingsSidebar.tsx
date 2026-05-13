@@ -455,7 +455,9 @@ function NavGroup({
         const isActive =
           item.to === "/settings"
             ? location.pathname === "/settings" || location.pathname.startsWith("/settings/")
-            : location.pathname === item.to || location.pathname.startsWith(item.to + "/");
+            : location.pathname === item.to
+              || location.pathname.startsWith(item.to + "/")
+              || location.pathname.startsWith(item.to + "-"); // variants like /apps-a, /apps-b
 
         return (
           <NavItem

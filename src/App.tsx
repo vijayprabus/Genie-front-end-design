@@ -27,6 +27,9 @@ const IntegrationsV3 = lazy(() => import("@/modules/settings/components/integrat
 const IntegrationsV4 = lazy(() => import("@/modules/settings/components/integrations/IntegrationsV4"));
 const IntegrationsV5 = lazy(() => import("@/modules/settings/components/integrations/IntegrationsV5"));
 const AppsTab = lazy(() => import("@/modules/settings/components/integrations/AppsTab"));
+const AppsTabA = lazy(() => import("@/modules/settings/components/integrations/AppsTabA"));
+const AppsTabB = lazy(() => import("@/modules/settings/components/integrations/AppsTabB"));
+const AppsTabC = lazy(() => import("@/modules/settings/components/integrations/AppsTabC"));
 const DataTab = lazy(() => import("@/modules/settings/components/integrations/DataTab"));
 const HomePage = lazy(() => import("@/modules/home/components/HomePage"));
 const ChatPage = lazy(() => import("@/modules/chat/pages/ChatPage/index.tsx"));
@@ -122,6 +125,9 @@ function AppRoutes() {
           <Route path="integrations-v4" element={<IntegrationsV4 />} />
           <Route path="integrations-v5" element={<IntegrationsV5 />} />
           <Route path="apps" element={<AppsTab />} />
+          <Route path="apps-a" element={<AppsTabA />} />
+          <Route path="apps-b" element={<AppsTabB />} />
+          <Route path="apps-c" element={<AppsTabC />} />
           <Route path="data" element={<DataTab />} />
         </Route>
       </Route>

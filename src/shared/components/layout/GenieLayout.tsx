@@ -46,8 +46,16 @@ export default function GenieLayout() {
     if (!isDesktop) setSidebarOpen(false);
   }, [location.pathname, isDesktop]);
 
+  // Stress-test variants: violet light on apps-a, violet dark on apps-b, violet-only swap on apps-c
+  const themeAttr =
+    location.pathname === "/settings/apps-a" ? "violet"
+    : location.pathname === "/settings/apps-b" ? "violet-dark"
+    : location.pathname === "/settings/apps-c" ? "violet-accent"
+    : undefined;
+
   return (
     <div
+      data-theme={themeAttr}
       style={{
         display: "flex",
         height: "100vh",
@@ -144,9 +152,9 @@ export default function GenieLayout() {
               <span style={{
                 position: "absolute", top: 0, right: -1,
                 width: 14, height: 14, borderRadius: "50%",
-                backgroundColor: ws.error, display: "flex",
+                backgroundColor: ws.errorBg, display: "flex",
                 alignItems: "center", justifyContent: "center",
-                fontSize: 8, fontWeight: 700, color: "white",
+                fontSize: 8, fontWeight: 700, color: ws.errorFg,
               }}>3</span>
             </button>
           </div>

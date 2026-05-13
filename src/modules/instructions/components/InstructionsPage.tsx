@@ -13,10 +13,12 @@ import {
   CaretRight,
   SpinnerGap,
 } from "@phosphor-icons/react";
+import { Plus } from "lucide-react";
 import { useBreakpoint } from "@/shared/hooks/useBreakpoint";
-import { instructions, type Instruction, type PublicationStatus } from "./instructionData";
+import { instructions, type Instruction, type PublicationStatus, createInstruction } from "./instructionData";
 import { ws as baseWs, f } from "@/shared/utils/contentTokens";
 import { ShimmerBar, SearchBar, Card } from "@/shared/components/settings";
+import CreateInstructionModal from "./CreateInstructionModal";
 
 const spring = "cubic-bezier(0.32, 0.72, 0, 1)";
 
@@ -492,10 +494,12 @@ export default function InstructionsPage() {
   const bp = useBreakpoint();
   const isMobile = bp === "mobile";
   const isDesktop = bp === "desktop";
+  const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [panelKey, setPanelKey] = useState(0);
   const [pageLoading, setPageLoading] = useState(true);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   // Page load simulation
   useEffect(() => {
@@ -517,6 +521,12 @@ export default function InstructionsPage() {
       setSelectedId(id);
       setPanelKey((k) => k + 1);
     }
+  };
+
+  const handleCreate = ({ name, description }: { name: string; description: string }) => {
+    const newId = createInstruction({ name, description });
+    setCreateModalOpen(false);
+    navigate(`/instructions/${newId}/edit`);
   };
 
   return (
@@ -588,21 +598,55 @@ export default function InstructionsPage() {
             <ListSkeleton />
           ) : (
             <>
-              {/* Heading + copy text */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <h1 style={{
-                  margin: 0,
-                  fontSize: isMobile ? 24 : 20,
-                  fontWeight: 700,
-                  color: ws.heading,
-                  fontFamily: f,
-                  transition: "font-size 0.2s ease",
-                }}>
-                  Instructions
-                </h1>
-                <p style={{ margin: 0, fontSize: isMobile ? 14 : 13, color: ws.secondary, lineHeight: 1.4, fontFamily: f }}>
-                  Manage the instructions.md files that control how each Worker behaves in production.
-                </p>
+              {/* Heading + copy text + New instruction button */}
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <h1 style={{
+                    margin: 0,
+                    fontSize: isMobile ? 24 : 20,
+                    fontWeight: 700,
+                    color: ws.heading,
+                    fontFamily: f,
+                    transition: "font-size 0.2s ease",
+                  }}>
+                    Instructions
+                  </h1>
+                  <p style={{ margin: 0, fontSize: isMobile ? 14 : 13, color: ws.secondary, lineHeight: 1.4, fontFamily: f }}>
+                    Manage the instructions.md files that control how each Worker behaves in production.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setCreateModalOpen(true)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    height: 36,
+                    padding: "0 16px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: ws.primary,
+                    color: "#FFF",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    fontFamily: f,
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    boxShadow: "0 1px 3px rgba(0,112,243,0.2)",
+                    transition: "background 0.15s ease, transform 0.1s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = ws.primaryHover;
+                    e.currentTarget.style.transform = "scale(1.02)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = ws.primary;
+                    e.currentTarget.style.transform = "scale(1)";
+                  }}
+                >
+                  <Plus size={14} />
+                  New instruction
+                </button>
               </div>
 
               {/* Hero search — caps at 480, shrinks when the detail panel opens */}
@@ -697,6 +741,13 @@ export default function InstructionsPage() {
           />
         )
       )}
+
+      {/* Create Instruction Modal */}
+      <CreateInstructionModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onCreate={handleCreate}
+      />
     </div>
   );
 }

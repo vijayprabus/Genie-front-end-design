@@ -90,6 +90,248 @@
   --ws-canvas-radius: 12px 12px 0 0;
   --ws-canvas-shadow: var(--ws-card-shadow);
   --ws-canvas-margin: 8px 8px 0 0;
+
+  /* ── Violet light-mode system — apps-a stress test ─────────────────── */
+  /* Brand Violet — 11 stops (perceptually uniform from #6246FF) */
+  --genie-violet-50: #F0EEFF;
+  --genie-violet-100: #E0D9FF;
+  --genie-violet-200: #C2B3FF;
+  --genie-violet-300: #9D80FF;
+  --genie-violet-400: #7D63FF;
+  --genie-violet-500: #6246FF;
+  --genie-violet-600: #4D34E0;
+  --genie-violet-700: #3A25BF;
+  --genie-violet-800: #28199E;
+  --genie-violet-900: #190F7D;
+  --genie-violet-950: #0D084F;
+
+  /* Neutral Gray — violet-tinted, 13 stops */
+  --genie-gray-0: #FFFFFF;
+  --genie-gray-50: #F7F7FB;
+  --genie-gray-100: #EDEDF5;
+  --genie-gray-200: #DCDDE8;
+  --genie-gray-300: #C2C3D4;
+  --genie-gray-400: #9394A8;
+  --genie-gray-500: #6B6C82;
+  --genie-gray-600: #4A4B5E;
+  --genie-gray-700: #2F3044;
+  --genie-gray-800: #1C1D2E;
+  --genie-gray-850: #141523;
+  --genie-gray-900: #0D0E1A;
+  --genie-gray-950: #080910;
+
+  /* Label Hierarchy — Apple HIG light mode (black-alpha) */
+  --genie-label-primary: #080910;
+  --genie-label-secondary: rgba(8, 9, 16, 0.60);
+  --genie-label-tertiary: rgba(8, 9, 16, 0.30);
+  --genie-label-quaternary: rgba(8, 9, 16, 0.18);
+
+  /* Fill System — light-mode translucent black */
+  --genie-fill-primary: rgba(8, 9, 16, 0.06);
+  --genie-fill-secondary: rgba(8, 9, 16, 0.04);
+  --genie-fill-tertiary: rgba(8, 9, 16, 0.025);
+  --genie-fill-quaternary: rgba(8, 9, 16, 0.015);
+
+  /* Semantic Colors — three tiers each (default / bg / fg) */
+  --genie-success: #2DCA72;
+  --genie-success-bg: #E6FAEC;
+  --genie-success-fg: #1A7A44;
+  --genie-warning: #F5A623;
+  --genie-warning-bg: #FFF6E5;
+  --genie-warning-fg: #946312;
+  --genie-danger: #FF4757;
+  --genie-danger-bg: #FFE9EB;
+  --genie-danger-fg: #9A1B25;
+  --genie-info: #0A84FF;
+  --genie-info-bg: #DBEEFF;
+  --genie-info-fg: #0650A0;
+  --genie-purple: #BF5AF2;
+  --genie-purple-bg: #F4E5FC;
+  --genie-purple-fg: #7A32A8;
+  --genie-teal: #5AC8FA;
+  --genie-teal-bg: #E0F4FE;
+  --genie-teal-fg: #2A7CA0;
+}
+
+/* ── data-theme="violet" — apps-a stress test ──────────────────────────
+   Override --ws-* to point at --genie-* values within any wrapped
+   subtree. Cascades to all sub-components (FilterChip, Toggle, Card,
+   ListRow, etc.) without code changes. */
+[data-theme="violet"] {
+  /* Surfaces — system Gray scale only (no custom hex values) */
+  --ws-page: var(--genie-gray-50);       /* #F7F7FB — light mode page bg */
+  --ws-surface: var(--genie-gray-50);    /* #F7F7FB — canvas + cards, soft violet-tinted off-white */
+  --ws-elevated: var(--genie-gray-100);  /* #EDEDF5 — elevated bg / hover */
+  --ws-muted: var(--genie-gray-100);     /* #EDEDF5 */
+  --ws-hover-bg: var(--genie-fill-secondary);
+  --ws-sidebar-bg: var(--genie-gray-100); /* #EDEDF5 — shell, soft violet tint, gentle lift over Gray 50 canvas */
+
+  /* Javis (Genie's own product) — adopt brand color in violet themes */
+  --ws-logo-javis-from: var(--genie-violet-400);
+  --ws-logo-javis-to: var(--genie-violet-600);
+
+  /* Borders */
+  --ws-border: var(--genie-gray-200);
+  --ws-divider: var(--genie-gray-100);
+  --ws-input-border: var(--genie-gray-300);
+
+  /* Text — Apple HIG label hierarchy */
+  --ws-heading: var(--genie-label-primary);
+  --ws-body: var(--genie-label-primary);
+  --ws-secondary: var(--genie-label-secondary);
+  --ws-muted-text: var(--genie-label-tertiary);
+  --ws-disabled: var(--genie-label-quaternary);
+
+  /* Brand */
+  --ws-primary: var(--genie-violet-500);
+  --ws-primary-hover: var(--genie-violet-600);
+  --ws-primary-dark: var(--genie-violet-700);
+  --ws-primary-light: var(--genie-violet-50);
+  --ws-brand-logo: var(--genie-violet-500);
+
+  /* Semantic */
+  --ws-success: var(--genie-success);
+  --ws-success-bg: var(--genie-success-bg);
+  --ws-success-fg: var(--genie-success-fg);
+  --ws-warning: var(--genie-warning);
+  --ws-warning-bg: var(--genie-warning-bg);
+  --ws-warning-fg: var(--genie-warning-fg);
+  --ws-error: var(--genie-danger);
+  --ws-error-bg: var(--genie-danger-bg);
+  --ws-error-fg: var(--genie-danger-fg);
+  --ws-error-border: var(--genie-danger-bg);
+  --ws-error-hover: var(--genie-danger-fg);
+  --ws-error-hover-bg: var(--genie-danger-bg);
+  --ws-error-text-hover: var(--genie-danger-fg);
+
+  /* Toggle / focus */
+  --ws-toggle-bg: var(--genie-gray-200);
+  --ws-focus-ring: 0 0 0 3px var(--genie-violet-100);
+
+  /* Sidebar tokens — adopt violet when wrapper covers sidebar too */
+  --ws-sidebar-active-bg: var(--genie-violet-50);
+  --ws-sidebar-active-hover-bg: var(--genie-violet-100);
+  --ws-sidebar-active-text: var(--genie-violet-700);
+  --ws-sidebar-active-icon: var(--genie-violet-500);
+  --ws-sidebar-focus-ring: var(--genie-violet-300);
+  --ws-active-pill-bg: var(--genie-violet-50);
+  --ws-active-pill-hover: var(--genie-violet-100);
+}
+
+/* ── data-theme="violet-accent" — apps-c minimal swap ──────────────────
+   Keeps Option D's neutral palette (cool zinc grays, white surfaces, body
+   text colors). Swaps ONLY the brand color from blue to violet. The
+   cleanest A/B test: same chrome, same surfaces, same typography — only
+   the primary brand changes. */
+[data-theme="violet-accent"] {
+  /* Brand — swap blue for violet */
+  --ws-primary: var(--genie-violet-500);
+  --ws-primary-hover: var(--genie-violet-600);
+  --ws-primary-dark: var(--genie-violet-700);
+  --ws-primary-light: var(--genie-violet-50);
+  --ws-brand-logo: var(--genie-violet-500);
+  --ws-focus-ring: 0 0 0 3px var(--genie-violet-100);
+
+  /* Sidebar active state — violet tint instead of blue */
+  --ws-sidebar-active-bg: var(--genie-violet-50);
+  --ws-sidebar-active-hover-bg: var(--genie-violet-100);
+  --ws-sidebar-active-text: var(--genie-violet-700);
+  --ws-sidebar-active-icon: var(--genie-violet-500);
+  --ws-sidebar-focus-ring: var(--genie-violet-300);
+  --ws-active-pill-bg: var(--genie-violet-50);
+  --ws-active-pill-hover: var(--genie-violet-100);
+
+  /* Javis (Genie's own product) — track brand color */
+  --ws-logo-javis-from: var(--genie-violet-400);
+  --ws-logo-javis-to: var(--genie-violet-600);
+}
+
+/* ── data-theme="violet-dark" — apps-b dark stress test ───────────────
+   Dark mode equivalent of the violet system. Same Brand Violet stops
+   reused; gray hierarchy inverts (Gray 900 page → Gray 800 cards);
+   labels/fills use Apple HIG dark mode (white-alpha). */
+[data-theme="violet-dark"] {
+  /* Surfaces — dark hierarchy with stronger shell-to-canvas contrast */
+  --ws-page: var(--genie-gray-950);          /* #080910 page bg */
+  --ws-surface: var(--genie-gray-800);       /* #1C1D2E cards + canvas */
+  --ws-elevated: var(--genie-gray-700);      /* #2F3044 elevated bg */
+  --ws-muted: var(--genie-gray-700);
+  --ws-hover-bg: rgba(255, 255, 255, 0.07);
+  --ws-sidebar-bg: var(--genie-gray-950);    /* #080910 — darker shell for clearer canvas lift */
+
+  /* Borders — Fill scale (0.12 Primary, 0.07 Secondary) */
+  --ws-border: rgba(255, 255, 255, 0.12);    /* Fill/Primary */
+  --ws-input-border: rgba(255, 255, 255, 0.18); /* Label/Quaternary — slightly stronger for inputs */
+
+  /* Javis (Genie's own product) — brighter violet for dark mode legibility */
+  --ws-logo-javis-from: var(--genie-violet-300);
+  --ws-logo-javis-to: var(--genie-violet-500);
+
+  /* Text — Apple HIG dark mode label hierarchy (artifact-defined values) */
+  --ws-heading: #FFFFFF;                          /* Label/Primary */
+  --ws-body: #FFFFFF;                             /* Label/Primary */
+  --ws-secondary: rgba(255, 255, 255, 0.60);      /* Label/Secondary */
+  --ws-muted-text: rgba(255, 255, 255, 0.36);     /* Label/Tertiary */
+  --ws-disabled: rgba(255, 255, 255, 0.18);       /* Label/Quaternary */
+
+  /* Brand — primary stays Violet 500, hover goes lighter on dark */
+  --ws-primary: var(--genie-violet-500);
+  --ws-primary-hover: var(--genie-violet-400);
+  --ws-primary-dark: var(--genie-violet-300);
+  --ws-primary-light: var(--genie-violet-950);   /* darkest violet bg for selected state */
+  --ws-brand-logo: var(--genie-violet-400);
+  --ws-on-primary: #FFFFFF;
+
+  /* Semantic — Fill/Primary alpha (0.12) + system Default for fg */
+  --ws-success: var(--genie-success);
+  --ws-success-bg: rgba(45, 202, 114, 0.12);   /* Fill/Primary alpha */
+  --ws-success-fg: var(--genie-success);
+  --ws-warning: var(--genie-warning);
+  --ws-warning-bg: rgba(245, 166, 35, 0.12);
+  --ws-warning-fg: var(--genie-warning);
+  --ws-error: var(--genie-danger);
+  --ws-error-bg: rgba(255, 71, 87, 0.12);
+  --ws-error-fg: var(--genie-danger);
+  --ws-error-border: rgba(255, 71, 87, 0.36);  /* Label/Tertiary alpha */
+  --ws-error-hover: var(--genie-danger);
+  --ws-error-hover-bg: rgba(255, 71, 87, 0.18); /* Label/Quaternary alpha */
+  --ws-error-text-hover: var(--genie-danger);
+
+  /* Toggle / focus — system alphas */
+  --ws-toggle-bg: rgba(255, 255, 255, 0.18);   /* Label/Quaternary */
+  --ws-focus-ring: 0 0 0 3px rgba(98, 70, 255, 0.36); /* Label/Tertiary alpha on brand */
+
+  /* Effects — Fill scale alphas only */
+  --ws-card-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 1px 3px rgba(0, 0, 0, 0.40), 0 8px 24px -4px rgba(0, 0, 0, 0.30);
+  --ws-card-border: 1px solid rgba(255, 255, 255, 0.04);   /* Fill/Tertiary */
+  --ws-divider: rgba(255, 255, 255, 0.04);                 /* Fill/Tertiary */
+  --ws-search-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 1px 3px rgba(0, 0, 0, 0.30);
+  --ws-search-border: 1px solid rgba(255, 255, 255, 0.04); /* Fill/Tertiary */
+  --ws-button-inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 2px rgba(0, 0, 0, 0.20);
+
+  /* Sidebar — dark with violet active state, all alphas snapped to system */
+  --ws-sidebar-bg: var(--genie-gray-950);
+  --ws-sidebar-zone: var(--genie-gray-900);
+  --ws-sidebar-divider: rgba(255, 255, 255, 0.07);   /* Fill/Secondary */
+  --ws-sidebar-body: #FFFFFF;                        /* Label/Primary */
+  --ws-sidebar-icon-rest: rgba(255, 255, 255, 0.60); /* Label/Secondary */
+  --ws-sidebar-icon-hover: #FFFFFF;                  /* Label/Primary */
+  --ws-sidebar-kb-hint: rgba(255, 255, 255, 0.36);   /* Label/Tertiary */
+  --ws-sidebar-active-bg: rgba(98, 70, 255, 0.18);   /* Label/Quaternary alpha */
+  --ws-sidebar-active-hover-bg: rgba(98, 70, 255, 0.36); /* Label/Tertiary alpha */
+  --ws-sidebar-active-text: var(--genie-violet-300);
+  --ws-sidebar-active-icon: var(--genie-violet-400);
+  --ws-sidebar-hover-bg: rgba(255, 255, 255, 0.07);  /* Fill/Secondary */
+  --ws-sidebar-focus-ring: var(--genie-violet-300);
+  --ws-sidebar-scrollbar: rgba(255, 255, 255, 0.18); /* Label/Quaternary */
+  --ws-sidebar-scrollbar-hover: rgba(255, 255, 255, 0.36); /* Label/Tertiary */
+  --ws-sidebar-section-label: rgba(255, 255, 255, 0.36);   /* Label/Tertiary */
+  --ws-sidebar-icon-btn-hover: rgba(255, 255, 255, 0.07);  /* Fill/Secondary */
+  --ws-sidebar-brand-text: #FFFFFF;                  /* Label/Primary */
+  --ws-sidebar-tooltip-bg: #FFFFFF;                  /* Label/Primary */
+  --ws-sidebar-tooltip-text: var(--genie-gray-950);
+  --ws-active-pill-bg: rgba(98, 70, 255, 0.18);
+  --ws-active-pill-hover: rgba(98, 70, 255, 0.36);
 }
 
 @layer base {

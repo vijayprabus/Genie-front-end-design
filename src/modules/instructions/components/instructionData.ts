@@ -418,7 +418,9 @@ This instruction triages incoming support tickets for the customer success team.
 - Agent: workload-balancer
 - Model class: standard`;
 
-// ---- Mock Instructions ----------------------------------------------------
+// ---- Session-mutable instruction store ------------------------------------
+// NOTE: This is a session-only store. New instructions are lost on page refresh.
+// A real backend would replace this with persistent API calls.
 
 export const instructions: Instruction[] = [
   {
@@ -490,3 +492,42 @@ export const instructions: Instruction[] = [
     content: ticketContent,
   },
 ];
+
+// ---- createInstruction helper ----------------------------------------------
+
+/**
+ * Creates a new instruction in the session store and returns its generated ID.
+ * The ID is a URL-safe slug derived from the name, with uniqueness guaranteed.
+ * NOTE: Session-only — resets on page refresh. Replace with API call for persistence.
+ */
+export function createInstruction({ name, description }: { name: string; description: string }): string {
+  // Generate slug: lowercase, non-alphanumeric runs → hyphen, trim leading/trailing hyphens
+  const baseSlug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  // Ensure uniqueness
+  let slug = baseSlug;
+  let i = 2;
+  while (instructions.some((ins) => ins.id === slug)) {
+    slug = `${baseSlug}-${i++}`;
+  }
+
+  const frontmatter = `---\nname: ${slug}\ndescription: ${description || ""}\n---\n\n`;
+
+  const newInstruction: Instruction = {
+    id: slug,
+    name: name.trim(),
+    description: description.trim(),
+    status: "draft",
+    version: "v1",
+    lastModifiedAt: "just now",
+    lastModifiedBy: "You",
+    issueCount: 0,
+    content: frontmatter,
+  };
+
+  instructions.push(newInstruction);
+  return slug;
+}

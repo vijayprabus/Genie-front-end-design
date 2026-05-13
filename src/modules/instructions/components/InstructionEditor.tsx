@@ -8,7 +8,7 @@ import {
   GitFork,
   FileCode,
 } from "@phosphor-icons/react";
-import { Copy, Check, ArrowUp, RotateCcw, SquarePen, ChevronsLeft, Shield, Paperclip, Mic, Sparkles, PanelLeftClose, PanelRightClose, Maximize2, GitBranch as LucideGitBranch, FileCode as LucideFileCode, FlaskConical, CircleCheck, BookOpen, TriangleAlert, PanelRightOpen, PanelLeftOpen, Plus, Minus, Scan, Brain, Plug, Layers, ChevronDown, Eye, ChevronRight } from "lucide-react";
+import { Copy, Check, ArrowUp, RotateCcw, SquarePen, ChevronsLeft, Shield, Paperclip, Mic, Sparkles, PanelLeftClose, PanelRightClose, Maximize2, GitBranch as LucideGitBranch, FileCode as LucideFileCode, FlaskConical, CircleCheck, BookOpen, TriangleAlert, PanelRightOpen, PanelLeftOpen, Plus, Minus, Scan, Brain, Plug, Layers, ChevronDown, Eye, ChevronRight, CheckCircle2, X as LucideX, LayoutTemplate, MessageCircle } from "lucide-react";
 import { instructions } from "./instructionData";
 import { ws as baseWs, f, spring } from "@/shared/utils/contentTokens";
 import { ShimmerBar } from "@/shared/components/settings";
@@ -453,7 +453,7 @@ function EditorGenieMessage({ content, title, timestamp }: { content: string; ti
 // ---------------------------------------------------------------------------
 // EditorInput — F1 design: editor zone + hairline divider + toolbar
 // ---------------------------------------------------------------------------
-function EditorInput({ onSend }: { onSend: (text: string) => void }) {
+function EditorInput({ onSend, placeholder = "Describe workflow changes..." }: { onSend: (text: string) => void; placeholder?: string }) {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
   const [sendHovered, setSendHovered] = useState(false);
@@ -536,7 +536,7 @@ function EditorInput({ onSend }: { onSend: (text: string) => void }) {
           onKeyDown={handleKeyDown}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          placeholder="Describe workflow changes..."
+          placeholder={placeholder}
           rows={1}
           style={{
             display: "block",
@@ -663,7 +663,7 @@ function EditorInput({ onSend }: { onSend: (text: string) => void }) {
 // ---------------------------------------------------------------------------
 // ChatPanel — Forge Assistant chat with proper message components
 // ---------------------------------------------------------------------------
-function ChatPanel({ onCollapse, instructionName, lineCount, mode, onRegisterRestore }: { onCollapse: () => void; instructionName: string; lineCount: number; mode: EditorMode; onRegisterRestore: (fn: (fromVersion: number) => void) => void }) {
+function ChatPanel({ onCollapse, instructionName, lineCount, mode, onRegisterRestore, isNewInstruction }: { onCollapse: () => void; instructionName: string; lineCount: number; mode: EditorMode; onRegisterRestore: (fn: (fromVersion: number) => void) => void; isNewInstruction: boolean }) {
   const isTesting = mode === "testing";
   const [messages, setMessages] = useState<EditorChatMessage[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -750,45 +750,96 @@ function ChatPanel({ onCollapse, instructionName, lineCount, mode, onRegisterRes
           <>
             {/* Welcome state */}
             <div style={{ padding: "24px 14px 0", display: "flex", flexDirection: "column", gap: 16, maxWidth: 520, margin: "0 auto", width: "100%", boxSizing: "border-box" }}>
-              {/* Fused context */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontSize: 14, fontWeight: 600, color: ws.heading, fontFamily: f }}>
-                  {instructionName}
-                </span>
-                <span style={{ fontSize: 11, color: ws.muted_text, fontFamily: f }}>
-                  {lineCount} lines · 5 steps · 2h ago
-                </span>
-              </div>
+              {isNewInstruction ? (
+                <>
+                  {/* New instruction welcome bubble */}
+                  <div style={{
+                    background: ws.elevated,
+                    borderRadius: 10,
+                    padding: "12px 14px",
+                    border: `1px solid ${ws.border}`,
+                  }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: ws.heading, fontFamily: f, marginBottom: 4 }}>
+                      Welcome
+                    </div>
+                    <div style={{ fontSize: 12, color: ws.body, fontFamily: f, lineHeight: 1.5 }}>
+                      Tell me what this workflow should do, or pick a quick action below. I'll scaffold the steps for you.
+                    </div>
+                  </div>
 
-              {/* Suggestion cards */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, maxWidth: 252 }}>
-                {[
-                  { icon: "book-open", label: "Explain this workflow" },
-                  { icon: "git-branch", label: "Add a fallback step" },
-                  { icon: "triangle-alert", label: "Handle doc failures" },
-                ].map((card) => (
-                  <button
-                    key={card.label}
-                    onClick={() => handleSend(card.label)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      padding: "8px 12px",
-                      borderRadius: 6,
-                      background: ws.elevated,
-                      border: "none",
-                      cursor: "pointer",
-                      fontFamily: f,
-                    }}
-                  >
-                    {card.icon === "book-open" && <BookOpen size={14} color={ws.secondary} />}
-                    {card.icon === "git-branch" && <LucideGitBranch size={14} color={ws.secondary} />}
-                    {card.icon === "triangle-alert" && <TriangleAlert size={14} color={ws.secondary} />}
-                    <span style={{ fontSize: 12, color: ws.body, fontWeight: 400 }}>{card.label}</span>
-                  </button>
-                ))}
-              </div>
+                  {/* New instruction quick actions */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, maxWidth: 252 }}>
+                    {[
+                      { icon: "sparkles", label: "Generate from a description" },
+                      { icon: "layout-template", label: "Start from a template" },
+                      { icon: "message-circle", label: "Walk me through it" },
+                    ].map((card) => (
+                      <button
+                        key={card.label}
+                        onClick={() => handleSend(card.label)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          padding: "8px 12px",
+                          borderRadius: 6,
+                          background: ws.elevated,
+                          border: "none",
+                          cursor: "pointer",
+                          fontFamily: f,
+                        }}
+                      >
+                        {card.icon === "sparkles" && <Sparkles size={14} color={ws.primary} />}
+                        {card.icon === "layout-template" && <LayoutTemplate size={14} color={ws.secondary} />}
+                        {card.icon === "message-circle" && <MessageCircle size={14} color={ws.secondary} />}
+                        <span style={{ fontSize: 12, color: ws.body, fontWeight: 400 }}>{card.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Existing instruction context */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: ws.heading, fontFamily: f }}>
+                      {instructionName}
+                    </span>
+                    <span style={{ fontSize: 11, color: ws.muted_text, fontFamily: f }}>
+                      {lineCount} lines · 5 steps · 2h ago
+                    </span>
+                  </div>
+
+                  {/* Suggestion cards */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, maxWidth: 252 }}>
+                    {[
+                      { icon: "book-open", label: "Explain this workflow" },
+                      { icon: "git-branch", label: "Add a fallback step" },
+                      { icon: "triangle-alert", label: "Handle doc failures" },
+                    ].map((card) => (
+                      <button
+                        key={card.label}
+                        onClick={() => handleSend(card.label)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          padding: "8px 12px",
+                          borderRadius: 6,
+                          background: ws.elevated,
+                          border: "none",
+                          cursor: "pointer",
+                          fontFamily: f,
+                        }}
+                      >
+                        {card.icon === "book-open" && <BookOpen size={14} color={ws.secondary} />}
+                        {card.icon === "git-branch" && <LucideGitBranch size={14} color={ws.secondary} />}
+                        {card.icon === "triangle-alert" && <TriangleAlert size={14} color={ws.secondary} />}
+                        <span style={{ fontSize: 12, color: ws.body, fontWeight: 400 }}>{card.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Spacer to push input to bottom */}
@@ -839,7 +890,7 @@ function ChatPanel({ onCollapse, instructionName, lineCount, mode, onRegisterRes
           boxSizing: "border-box",
         }}
       >
-        <EditorInput onSend={handleSend} />
+        <EditorInput onSend={handleSend} placeholder={isNewInstruction ? "Describe your workflow..." : "Describe workflow changes..."} />
       </div>
     </div>
   );
@@ -1514,6 +1565,144 @@ function ModeToggle({ mode, onModeChange }: { mode: EditorMode; onModeChange: (m
 }
 
 // ---------------------------------------------------------------------------
+// DotPulse — animated "· · ·" for restore phase status
+// ---------------------------------------------------------------------------
+function DotPulse() {
+  const [frame, setFrame] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setFrame((f) => (f + 1) % 4), 400);
+    return () => clearInterval(t);
+  }, []);
+  const dots = ["", "·", "· ·", "· · ·"][frame];
+  return (
+    <span style={{ display: "inline-block", minWidth: 18, fontFamily: f, fontSize: 12, color: "inherit" }}>
+      {dots}
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// RestoreToast — bottom-right pill with undo + progress bar
+// ---------------------------------------------------------------------------
+interface ToastProps {
+  visible: boolean;
+  message: string;
+  showUndo: boolean;
+  onUndo: () => void;
+  onClose: () => void;
+}
+
+function RestoreToast({ visible, message, showUndo, onUndo, onClose }: ToastProps) {
+  const [mounted, setMounted] = useState(false);
+  const [progressKey, setProgressKey] = useState(0);
+
+  useEffect(() => {
+    if (visible) {
+      // Small delay so CSS transition fires after mount
+      const t = setTimeout(() => setMounted(true), 16);
+      setProgressKey((k) => k + 1);
+      return () => clearTimeout(t);
+    } else {
+      setMounted(false);
+    }
+  }, [visible]);
+
+  if (!visible && !mounted) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        bottom: 24,
+        right: 24,
+        zIndex: 9999,
+        width: 320,
+        minHeight: 56,
+        background: "rgba(0,0,0,0.92)",
+        borderRadius: 12,
+        boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+        padding: "0 16px",
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        overflow: "hidden",
+        transform: mounted && visible ? "translateY(0)" : "translateY(100%)",
+        opacity: mounted && visible ? 1 : 0,
+        transition: "transform 240ms cubic-bezier(0.32, 0.72, 0, 1), opacity 240ms ease-out",
+        fontFamily: f,
+      }}
+    >
+      {/* Green dot */}
+      <span style={{
+        width: 6, height: 6, borderRadius: "50%",
+        background: ws.success, flexShrink: 0,
+      }} />
+      {/* Message */}
+      <span style={{ fontSize: 13, fontWeight: 500, color: "#FFF", flex: 1 }}>
+        {message}
+      </span>
+      {/* Undo button */}
+      {showUndo && (
+        <button
+          onClick={onUndo}
+          style={{
+            background: "none", border: "none", padding: "0 4px",
+            fontSize: 13, fontWeight: 600, color: ws.primaryLight,
+            cursor: "pointer", textDecoration: "none",
+            transition: "text-decoration 0.1s",
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.textDecoration = "underline"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.textDecoration = "none"; }}
+        >
+          Undo
+        </button>
+      )}
+      {/* Close button */}
+      <button
+        onClick={onClose}
+        style={{
+          background: "none", border: "none", padding: "0 2px",
+          cursor: "pointer", display: "flex", alignItems: "center",
+          opacity: 0.6, transition: "opacity 0.15s", flexShrink: 0,
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.6"; }}
+      >
+        <LucideX size={16} color="#FFF" />
+      </button>
+      {/* Progress bar */}
+      {showUndo && (
+        <ProgressBar key={progressKey} active={visible} />
+      )}
+    </div>
+  );
+}
+
+function ProgressBar({ active }: { active: boolean }) {
+  const [started, setStarted] = useState(false);
+  useEffect(() => {
+    if (active) {
+      const t = setTimeout(() => setStarted(true), 32);
+      return () => clearTimeout(t);
+    } else {
+      setStarted(false);
+    }
+  }, [active]);
+
+  return (
+    <div style={{
+      position: "absolute",
+      bottom: 0, left: 0,
+      height: 2,
+      background: ws.primary,
+      width: started ? "0%" : "100%",
+      transition: started ? "width 8s linear" : "none",
+    }} />
+  );
+}
+
+// ---------------------------------------------------------------------------
 // InstructionEditor — main export
 // ---------------------------------------------------------------------------
 export default function InstructionEditor() {
@@ -1523,6 +1712,13 @@ export default function InstructionEditor() {
     () => instructions.find((i) => i.id === instructionId),
     [instructionId]
   );
+
+  // Detect a freshly-created instruction: only frontmatter lines, no body
+  const isNewInstruction = useMemo(() => {
+    if (!instruction) return false;
+    const lines = instruction.content.split("\n").filter((l) => l.trim());
+    return lines.length <= 4 && instruction.issueCount === 0 && instruction.lastModifiedAt === "just now";
+  }, [instruction]);
 
   const [chatOpen, setChatOpen] = useState(true);
   const [yamlState, setYamlState] = useState<"open" | "collapsed-left" | "collapsed-right">("open");
@@ -1537,6 +1733,16 @@ export default function InstructionEditor() {
   const [currentVersion, setCurrentVersion] = useState(4);
   const [isRestoring, setIsRestoring] = useState(false);
   const [previewVersion, setPreviewVersion] = useState<number | null>(null);
+  type RestorePhase = null | "morph" | "phase1" | "phase2" | "success";
+  const [restorePhase, setRestorePhase] = useState<RestorePhase>(null);
+  const [toastState, setToastState] = useState<{
+    visible: boolean;
+    fromVersion: number | null;
+    toVersion: number | null;
+    message: string;
+  } | null>(null);
+  const undoSnapshotRef = useRef<{ version: number; content: string } | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
   const columnsRef = useRef<HTMLDivElement>(null);
   const chatRestoreRef = useRef<((fromVersion: number) => void) | null>(null);
 
@@ -1642,16 +1848,64 @@ export default function InstructionEditor() {
   const handleRestoreFromPreview = () => {
     if (previewVersion === null) return;
     const fromVersion = previewVersion;
+    const oldVersion = currentVersion;
+    const oldContent = instruction?.content ?? "";
+
+    // Snapshot for undo
+    undoSnapshotRef.current = { version: oldVersion, content: oldContent };
+
     setIsRestoring(true);
+    setRestorePhase("morph");
+
+    // Phase 1: Reverting content…
+    setTimeout(() => setRestorePhase("phase1"), 200);
+    // Phase 2: Updating workflow graph…
+    setTimeout(() => setRestorePhase("phase2"), 900);
+    // Success bloom
     setTimeout(() => {
-      const newVer = currentVersion + 1;
+      setRestorePhase("success");
+      const newVer = oldVersion + 1;
       setCurrentVersion(newVer);
-      // Restored content stays as-is (previewed version's content) — becomes new draft
+    }, 1450);
+    // Settle: clear preview + show toast
+    setTimeout(() => {
+      setRestorePhase(null);
       setPreviewVersion(null);
       setMode("viewing");
       setIsRestoring(false);
+      setToastState({
+        visible: true,
+        fromVersion,
+        toVersion: oldVersion + 1,
+        message: `Restored to v${fromVersion} as new v${oldVersion + 1}`,
+      });
       if (chatRestoreRef.current) chatRestoreRef.current(fromVersion);
-    }, 400);
+    }, 1800);
+  };
+
+  useEffect(() => {
+    if (toastState?.visible) {
+      toastTimerRef.current = window.setTimeout(() => {
+        setToastState((prev) => prev ? { ...prev, visible: false } : null);
+      }, 8000);
+      return () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); };
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [toastState?.visible, toastState?.toVersion]);
+
+  const handleUndoRestore = () => {
+    if (!undoSnapshotRef.current) return;
+    const snap = undoSnapshotRef.current;
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setCurrentVersion(snap.version);
+    setContent(snap.content);
+    undoSnapshotRef.current = null;
+    setToastState({ visible: true, fromVersion: null, toVersion: null, message: "Restore undone" });
+  };
+
+  const handleDismissToast = () => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToastState((prev) => prev ? { ...prev, visible: false } : null);
   };
 
   if (pageLoading) {
@@ -1869,26 +2123,54 @@ export default function InstructionEditor() {
             draft: { background: ws.primaryLight, color: ws.primary },
           };
           const sps = previewEntry ? statusPillStyle[previewEntry.status] : statusPillStyle.draft;
+
+          // Determine phase-driven metadata vs status text
+          const isInPhase = restorePhase === "morph" || restorePhase === "phase1" || restorePhase === "phase2";
+          const isSuccess = restorePhase === "success";
+
+          const phaseLabel = restorePhase === "phase2" ? "Updating workflow graph…" : "Reverting content…";
+
           return (
             <>
-              <Eye size={14} color={ws.primary} />
-              <span style={{ fontSize: 13, fontWeight: 500, color: ws.primary, fontFamily: f }}>
-                Viewing v{previewVersion}
-              </span>
-              <span style={{ fontSize: 12, fontWeight: 400, color: ws.secondary, fontFamily: f }}>
-                · {previewEntry?.author} · {previewEntry?.timeAgo} ago
-              </span>
-              {previewEntry && (
-                <span style={{
-                  display: "inline-flex", alignItems: "center",
-                  padding: "1px 7px", borderRadius: 999,
-                  fontSize: 10, fontWeight: 600,
-                  ...sps,
-                }}>
-                  {previewEntry.status.charAt(0).toUpperCase() + previewEntry.status.slice(1)}
+              {/* Metadata block — idle preview state */}
+              {!isInPhase && !isSuccess && (
+                <>
+                  <Eye size={14} color={ws.primary} />
+                  <span style={{ fontSize: 13, fontWeight: 500, color: ws.primary, fontFamily: f }}>
+                    Viewing v{previewVersion}
+                  </span>
+                  <span style={{ fontSize: 12, fontWeight: 400, color: ws.secondary, fontFamily: f }}>
+                    · {previewEntry?.author} · {previewEntry?.timeAgo} ago
+                  </span>
+                  {previewEntry && (
+                    <span style={{
+                      display: "inline-flex", alignItems: "center",
+                      padding: "1px 7px", borderRadius: 999,
+                      fontSize: 10, fontWeight: 600,
+                      ...sps,
+                    }}>
+                      {previewEntry.status.charAt(0).toUpperCase() + previewEntry.status.slice(1)}
+                    </span>
+                  )}
+                </>
+              )}
+
+              {/* Phase status text — morph/phase1/phase2 */}
+              {isInPhase && (
+                <span style={{ fontSize: 12, fontWeight: 500, color: ws.secondary, fontFamily: f, display: "flex", alignItems: "center", gap: 4 }}>
+                  {phaseLabel}
+                  <DotPulse />
                 </span>
               )}
-              {/* Back to current */}
+
+              {/* Success state */}
+              {isSuccess && (
+                <span style={{ fontSize: 12, fontWeight: 500, color: ws.successFg, fontFamily: f }}>
+                  Restored as v{currentVersion}
+                </span>
+              )}
+
+              {/* Back to current — disabled during restore */}
               <button
                 onClick={handleExitPreview}
                 disabled={isRestoring}
@@ -1898,7 +2180,7 @@ export default function InstructionEditor() {
                   color: ws.body, fontSize: 11, fontWeight: 500, fontFamily: f,
                   cursor: isRestoring ? "default" : "pointer",
                   opacity: isRestoring ? 0.5 : 1,
-                  transition: "background 0.15s ease",
+                  transition: "background 0.15s ease, opacity 0.15s ease",
                   marginLeft: 8,
                 }}
                 onMouseEnter={(e) => { if (!isRestoring) e.currentTarget.style.background = ws.elevated; }}
@@ -1906,26 +2188,34 @@ export default function InstructionEditor() {
               >
                 Back to current
               </button>
-              {/* Restore this version */}
+
+              {/* Restore button — morphs through phases */}
               <button
-                onClick={handleRestoreFromPreview}
+                onClick={!isRestoring ? handleRestoreFromPreview : undefined}
                 disabled={isRestoring}
                 style={{
                   height: 30, padding: "0 16px", borderRadius: 8, border: "none",
-                  background: ws.primary, cursor: isRestoring ? "default" : "pointer",
+                  background: isSuccess ? ws.success : ws.primary,
+                  cursor: isRestoring ? "default" : "pointer",
                   fontSize: 11, fontWeight: 600, color: "#FFF", fontFamily: f,
-                  boxShadow: "0 1px 3px rgba(0,112,243,0.2)",
+                  boxShadow: isSuccess
+                    ? "0 0 0 4px rgba(0, 166, 90, 0.18), 0 1px 3px rgba(0,166,90,0.2)"
+                    : "0 1px 3px rgba(0,112,243,0.2)",
                   display: "flex", alignItems: "center", gap: 4,
-                  opacity: isRestoring ? 0.7 : 1,
-                  transition: "opacity 0.15s ease",
+                  transform: isSuccess ? "scale(1.05)" : "scale(1.0)",
+                  transition: "background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease-out",
                 }}
               >
-                <RotateCcw
-                  size={12}
-                  color="#FFF"
-                  style={isRestoring ? { animation: "spin 1s linear infinite" } : undefined}
-                />
-                {isRestoring ? "Restoring…" : "Restore this version"}
+                {isSuccess ? (
+                  <CheckCircle2 size={12} color="#FFF" />
+                ) : (
+                  <RotateCcw
+                    size={12}
+                    color="#FFF"
+                    style={isRestoring ? { animation: "spin 1s linear infinite" } : undefined}
+                  />
+                )}
+                {isSuccess ? "Restored" : isRestoring ? "Restoring…" : "Restore this version"}
               </button>
             </>
           );
@@ -1936,24 +2226,6 @@ export default function InstructionEditor() {
       {/* Three columns                                                    */}
       {/* ---------------------------------------------------------------- */}
       <div ref={columnsRef} style={{ display: "flex", flex: 1, minHeight: 0, gap: 0, padding: "6px", position: "relative" }}>
-
-        {isRestoring && (
-          <div style={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 100,
-            background: "rgba(235, 231, 226, 0.7)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 10,
-            transition: "opacity 200ms ease",
-          }}>
-            <span style={{ fontSize: 12, fontWeight: 500, color: ws.muted_text, fontFamily: f }}>
-              Restoring…
-            </span>
-          </div>
-        )}
 
         {/* Chat column */}
         <div
@@ -1976,6 +2248,7 @@ export default function InstructionEditor() {
               lineCount={lineNumbers.length}
               mode={mode}
               onRegisterRestore={(fn) => { chatRestoreRef.current = fn; }}
+              isNewInstruction={isNewInstruction}
             />
           ) : (
             <PanelStrip
@@ -2053,70 +2326,87 @@ export default function InstructionEditor() {
                   style={{
                     flex: 1,
                     display: "flex",
+                    flexDirection: "column",
                     overflow: "hidden",
                     background: previewVersion !== null ? ws.page : "#FFFFFF",
                     transition: "background 0.15s ease",
                   }}
                 >
-                  {/* Line numbers */}
-                  <div
-                    aria-hidden
-                    style={{
-                      width: 36,
-                      flexShrink: 0,
-                      padding: "12px 4px 12px 0",
-                      textAlign: "right",
-                      userSelect: "none",
-                      overflowY: "hidden",
-                      background: previewVersion !== null ? ws.page : "#FFFFFF",
-                      transition: "background 0.15s ease",
-                    }}
-                  >
-                    {lineNumbers.map((n) => (
-                      <div
-                        key={n}
-                        style={{
-                          fontSize: 11,
-                          fontFamily: mono,
-                          color: ws.gutter,
-                          lineHeight: "20px",
-                          height: 20,
-                          paddingRight: 4,
-                        }}
-                      >
-                        {n}
-                      </div>
-                    ))}
+                  <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+                    {/* Line numbers */}
+                    <div
+                      aria-hidden
+                      style={{
+                        width: 36,
+                        flexShrink: 0,
+                        padding: "12px 4px 12px 0",
+                        textAlign: "right",
+                        userSelect: "none",
+                        overflowY: "hidden",
+                        background: previewVersion !== null ? ws.page : "#FFFFFF",
+                        transition: "background 0.15s ease",
+                      }}
+                    >
+                      {lineNumbers.map((n) => (
+                        <div
+                          key={n}
+                          style={{
+                            fontSize: 11,
+                            fontFamily: mono,
+                            color: ws.gutter,
+                            lineHeight: "20px",
+                            height: 20,
+                            paddingRight: 4,
+                          }}
+                        >
+                          {n}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Textarea */}
+                    <textarea
+                      value={content}
+                      onChange={(e) => {
+                        if (previewVersion !== null) return;
+                        setContent(e.target.value);
+                        setIsLocked(false);
+                        if (mode === "viewing" || mode === "validated") {
+                          setMode("editing");
+                        }
+                      }}
+                      readOnly={previewVersion !== null || mode === "viewing" || mode === "validating" || mode === "testing"}
+                      spellCheck={false}
+                      style={{
+                        flex: 1,
+                        padding: "12px 16px",
+                        background: "transparent",
+                        border: "none",
+                        outline: "none",
+                        resize: "none",
+                        fontSize: 12,
+                        fontFamily: mono,
+                        color: isLocked ? ws.secondary : ws.body,
+                        lineHeight: "20px",
+                        caretColor: ws.primary,
+                        cursor: previewVersion !== null ? "default" : undefined,
+                      }}
+                    />
                   </div>
 
-                  {/* Textarea */}
-                  <textarea
-                    value={content}
-                    onChange={(e) => {
-                      if (previewVersion !== null) return;
-                      setContent(e.target.value);
-                      setIsLocked(false);
-                      if (mode === "viewing" || mode === "validated") {
-                        setMode("editing");
-                      }
-                    }}
-                    readOnly={previewVersion !== null || mode === "viewing" || mode === "validating" || mode === "testing"}
-                    spellCheck={false}
-                    style={{
-                      flex: 1,
-                      padding: "12px 16px",
-                      background: "transparent",
-                      border: "none",
-                      outline: "none",
-                      resize: "none",
-                      fontSize: 12,
-                      fontFamily: mono,
-                      color: isLocked ? ws.secondary : ws.body,
-                      lineHeight: "20px",
-                      caretColor: ws.primary,
-                      cursor: previewVersion !== null ? "default" : undefined,
-                    }}
-                  />
+                  {/* New instruction ghost hint */}
+                  {isNewInstruction && (
+                    <div style={{
+                      padding: "60px 20px",
+                      textAlign: "center",
+                      color: ws.muted_text,
+                      fontSize: 13,
+                      fontFamily: f,
+                      flexShrink: 0,
+                    }}>
+                      Click Edit to start authoring · or use Forge Assistant ←
+                    </div>
+                  )}
                 </div>
               </>
             ) : (
@@ -2170,6 +2460,19 @@ export default function InstructionEditor() {
       {/* Prototype mode toggle — floating pill for demos                  */}
       {/* ---------------------------------------------------------------- */}
       <ModeToggle mode={mode} onModeChange={setMode} />
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Restore toast — fixed bottom-right                               */}
+      {/* ---------------------------------------------------------------- */}
+      {toastState && (
+        <RestoreToast
+          visible={toastState.visible}
+          message={toastState.message}
+          showUndo={toastState.fromVersion !== null}
+          onUndo={handleUndoRestore}
+          onClose={handleDismissToast}
+        />
+      )}
 
     </div>
   );

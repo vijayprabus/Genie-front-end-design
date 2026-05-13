@@ -300,8 +300,8 @@ export function JavisLogo({ size = 20 }: { size?: number }) {
     <svg viewBox="0 0 24 24" width={size} height={size}>
       <defs>
         <linearGradient id="javis-g" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#2B7FFF" />
-          <stop offset="100%" stopColor="#0055FF" />
+          <stop offset="0%" stopColor="var(--ws-logo-javis-from, #2B7FFF)" />
+          <stop offset="100%" stopColor="var(--ws-logo-javis-to, #0055FF)" />
         </linearGradient>
       </defs>
       <path d="M12 2C6.48 2 2 5.92 2 10.67c0 2.72 1.52 5.15 3.9 6.72l-.4 3.83c-.05.48.5.78.88.5L10 19.2c.64.1 1.31.16 2 .16c5.52 0 10-3.92 10-8.69C22 5.92 17.52 2 12 2z" fill="url(#javis-g)" />
