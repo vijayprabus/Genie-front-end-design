@@ -1,7 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-
-type Theme = "light" | "dark";
+import { applyTheme, getStoredTheme, type Theme } from "@/shared/utils/theme";
 
 interface ThemeState {
   theme: Theme;
@@ -9,29 +7,17 @@ interface ThemeState {
   toggleTheme: () => void;
 }
 
-export const useThemeStore = create<ThemeState>()(
-  persist(
-    (set, get) => ({
-      theme: "light",
+export const useThemeStore = create<ThemeState>()((set, get) => ({
+  theme: getStoredTheme(),
 
-      setTheme: (theme: Theme) => {
-        document.documentElement.classList.toggle("dark", theme === "dark");
-        set({ theme });
-      },
+  setTheme: (theme: Theme) => {
+    applyTheme(theme);
+    set({ theme });
+  },
 
-      toggleTheme: () => {
-        const next = get().theme === "light" ? "dark" : "light";
-        document.documentElement.classList.toggle("dark", next === "dark");
-        set({ theme: next });
-      },
-    }),
-    {
-      name: "theme-store",
-      onRehydrateStorage: () => (state) => {
-        if (state?.theme === "dark") {
-          document.documentElement.classList.add("dark");
-        }
-      },
-    },
-  ),
-);
+  toggleTheme: () => {
+    const next: Theme = get().theme === "dark" ? "light" : "dark";
+    applyTheme(next);
+    set({ theme: next });
+  },
+}));

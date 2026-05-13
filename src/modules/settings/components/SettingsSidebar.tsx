@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import { ThemeToggle } from "@/shared/components/layout/ThemeToggle";
 import {
   X,
   Home,
@@ -551,6 +552,9 @@ function ProfileZone() {
       >
         Admin
       </span>
+
+      {/* Dark mode toggle */}
+      <ThemeToggle />
     </NavLink>
   );
 }
